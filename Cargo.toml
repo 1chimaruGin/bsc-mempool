@@ -1,43 +1,91 @@
 [workspace]
-resolver = "2"
-members = [
-    # Phase 1 (chain-agnostic, ported from eth-meme-mev):
-    "crates/bsc-core",
-    "crates/bsc-bus",
-    "crates/bsc-sources",
-    "crates/bsc-telemetry",
-    # Phase 2 (BSC-specific, new code):
-    "crates/bsc-dex",        # PancakeSwap V2/V3 + Multicall3
-    "crates/bsc-runner",     # binary
-]
+resolver = "3"
+members = ["crates/*"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-license = "MIT OR Apache-2.0"
+license = "Apache-2.0 OR MIT"
 publish = false
-rust-version = "1.83"
+authors = ["bsc-meme-mev"]
+rust-version = "1.85"
 
 [workspace.dependencies]
-# Mirror the ETH workspace's dep pins — same alloy, tokio, etc. The actual values
-# get filled in once the crates are ported in. Listed here for visibility:
-# alloy = { version = "...", features = [...] }
-# tokio = { version = "...", features = [...] }
-# tokio-util = { version = "...", features = [...] }
-# anyhow, thiserror, serde, serde_json, toml, figment, clap, futures, parking_lot
-# dashmap, metrics, metrics-exporter-prometheus, reqwest, url, tracing, tracing-subscriber
+# Execution-layer types, RPC, RLP, signer recovery — chain-agnostic; same as ETH stack.
+alloy = { version = "2", default-features = false, features = [
+    "std",
+    "consensus",
+    "consensus-secp256k1",
+    "rlp",
+    "network",
+    "serde",
+    "rpc-types-eth",
+] }
+
+# tokio runtime
+tokio = { version = "1.45", features = ["rt-multi-thread", "macros", "signal", "sync", "time", "net", "fs", "io-util"] }
+tokio-util = { version = "0.7", features = ["rt"] }
+tokio-stream = "0.1"
+async-trait = "0.1"
+futures = "0.3"
+
+# HTTP — for token resolver, JSON-RPC, Telegram. No SSE on BSC (no Beacon).
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+url = "2"
+
+# data structures
+dashmap = "6"
+ahash = "0.8"
+parking_lot = "0.12"
+smallvec = { version = "1", features = ["serde"] }
+arc-swap = "1"
+
+# observability
+metrics = "0.24"
+metrics-exporter-prometheus = "0.17"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
+
+# config / serde
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+figment = { version = "0.10", features = ["toml", "env"] }
+
+# system
+core_affinity = "0.8"
+num_cpus = "1"
+
+# storage
+zstd = "0.13"
+bincode = "2"
+
+# error / cli
+anyhow = "1"
+thiserror = "2"
+clap = { version = "4", features = ["derive", "env"] }
+
+# crypto / hashing
+sha2 = "0.10"
+hex = "0.4"
+
+# internal
+bsc-core = { path = "crates/bsc-core" }
+bsc-bus = { path = "crates/bsc-bus" }
+bsc-sources = { path = "crates/bsc-sources" }
+bsc-telemetry = { path = "crates/bsc-telemetry" }
+bsc-dex = { path = "crates/bsc-dex" }
 
 [workspace.lints.rust]
-unused = "warn"
 unsafe_code = "deny"
 
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
-needless_pass_by_value = "allow"
+module_name_repetitions = "allow"
 must_use_candidate = "allow"
 missing_errors_doc = "allow"
 missing_panics_doc = "allow"
-module_name_repetitions = "allow"
+multiple_crate_versions = "allow"
 
 [profile.release]
 opt-level = 3
@@ -47,5 +95,6 @@ panic = "abort"
 strip = "symbols"
 
 [profile.bench]
-inherits = "release"
-debug = true
+opt-level = 3
+lto = "thin"
+codegen-units = 1

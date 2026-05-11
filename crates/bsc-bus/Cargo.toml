@@ -1,0 +1,28 @@
+[package]
+name = "bsc-bus"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+ahash = { workspace = true }
+alloy = { workspace = true }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+bsc-core = { workspace = true }
+dashmap = { workspace = true }
+metrics = { workspace = true }
+parking_lot = { workspace = true }
+smallvec = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
+
+[lints]
+workspace = true
