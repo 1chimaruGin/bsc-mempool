@@ -1,0 +1,36 @@
+[package]
+name = "bsc-sources"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+alloy = { workspace = true, features = [
+    "providers",
+    "provider-ws-ring",
+    "provider-ipc",
+    "pubsub",
+    "rpc-client",
+    "rpc-client-ws-ring",
+    "rpc-client-ipc",
+    "transport-ws-ring",
+    "transport-ipc",
+    "rpc-types",
+] }
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+bsc-core = { workspace = true }
+futures = { workspace = true }
+metrics = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+
+[lints]
+workspace = true

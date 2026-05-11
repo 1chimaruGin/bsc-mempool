@@ -1,0 +1,39 @@
+[package]
+name = "bsc-telemetry"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+alloy = { workspace = true, features = [
+    "providers",
+    "provider-ws-ring",
+    "pubsub",
+    "rpc-client",
+    "rpc-client-ws-ring",
+    "transport-ws-ring",
+    "rpc-types",
+] }
+anyhow = { workspace = true }
+bincode = { workspace = true, features = ["serde"] }
+bsc-bus = { workspace = true }
+bsc-core = { workspace = true }
+futures = { workspace = true }
+metrics = { workspace = true }
+metrics-exporter-prometheus = { workspace = true }
+parking_lot = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+zstd = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints]
+workspace = true
