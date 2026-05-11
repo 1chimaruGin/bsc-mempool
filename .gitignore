@@ -1,0 +1,39 @@
+# build
+/target
+**/*.rs.bk
+/Cargo.lock.bak
+
+# secrets
+.env
+.env.local
+.env.*.local
+
+# node data — multi-hundred-GB
+/bsc-geth/
+/bsc/
+/geth/
+
+# runtime ledgers
+/trader/
+/liquidator/
+/captures/
+/reports/
+
+# logs
+*.log
+
+# IDE / agent state
+.idea/
+.vscode/
+.claude/
+.cursor/
+
+# Python virtualenvs
+/.venv/
+/venv/
+__pycache__/
+*.pyc
+
+# misc
+.DS_Store
+Thumbs.db

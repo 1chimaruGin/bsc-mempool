@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = [
+    # Phase 1 (chain-agnostic, ported from eth-meme-mev):
+    "crates/bsc-core",
+    "crates/bsc-bus",
+    "crates/bsc-sources",
+    "crates/bsc-telemetry",
+    # Phase 2 (BSC-specific, new code):
+    "crates/bsc-dex",        # PancakeSwap V2/V3 + Multicall3
+    "crates/bsc-runner",     # binary
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+rust-version = "1.83"
+
+[workspace.dependencies]
+# Mirror the ETH workspace's dep pins — same alloy, tokio, etc. The actual values
+# get filled in once the crates are ported in. Listed here for visibility:
+# alloy = { version = "...", features = [...] }
+# tokio = { version = "...", features = [...] }
+# tokio-util = { version = "...", features = [...] }
+# anyhow, thiserror, serde, serde_json, toml, figment, clap, futures, parking_lot
+# dashmap, metrics, metrics-exporter-prometheus, reqwest, url, tracing, tracing-subscriber
+
+[workspace.lints.rust]
+unused = "warn"
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+needless_pass_by_value = "allow"
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+
+[profile.bench]
+inherits = "release"
+debug = true

@@ -1,0 +1,108 @@
+# bsc-meme-mev — default config (BSC mainnet)
+# Override any value via env: BSC_MEME_MEV_<SECTION>__<KEY> (double underscore separator).
+
+[chain]
+# BSC mainnet. Verify with `cast chain-id --rpc-url http://127.0.0.1:8545` on first launch.
+id = 56
+name = "bsc-mainnet"
+native_symbol = "BNB"
+native_decimals = 18
+
+[metrics]
+# Localhost only; SSH-tunnel for remote dashboards.
+listen_addr = "127.0.0.1:9101"   # +1 vs ETH stack so they can coexist for a transition window
+
+[capture]
+enabled = false
+dir = "/data/bsc-meme-mev/captures"
+rotate_secs = 3600
+retention_bytes = 107374182400   # 100 GiB (BSC is 4× ETH's tx rate)
+max_age_secs = 172800            # 48 h
+zstd_level = 3
+
+[pipeline]
+# BSC has ~5× ETH's pending-tx rate during memecoin churn; raise queue caps.
+raw_channel_capacity = 32768
+decoded_channel_capacity = 32768
+broadcast_capacity = 65536
+dedupe_capacity = 524288
+dedupe_ttl_secs = 60          # shorter; BSC blocks are 3 s
+decoder_workers = 4
+janitor_interval_secs = 5
+
+[sources]
+# bsc-geth IPC (preferred — zero RPC fee, lowest latency).
+[sources.ipc]
+path = "/data/bsc-meme-mev/bsc-geth/geth.ipc"
+
+# Optional WSS providers (paid mempool gateways — leave empty for self-hosted-only).
+wss = [
+    # { name = "quicknode-bsc", source_id = 1, url = "wss://..." },
+]
+
+[block_oracle]
+# Local bsc-geth WS for newHeads + tx receipts.
+el_ws_url = "ws://127.0.0.1:8546"
+
+[kol_watch]
+enabled = true
+file = "config/kols.toml"
+groups = []
+
+# Buy-size floor BEFORE we paper-trade a KOL hit. BSC swaps are cheap;
+# threshold can be lower than ETH's 0.15 ETH ($350). Default: 0.5 BNB ≈ $300.
+[trader]
+enabled = true
+mode = "paper"
+min_buy_bnb_wei = "500000000000000000"   # 0.5 BNB
+size_fraction = 0.05
+rpc_url = "http://127.0.0.1:8545"
+ledger_dir = "/data/bsc-meme-mev/trader"
+hold_timeout_secs = 86400
+sweep_interval_secs = 300
+daily_summary_utc_hour = 0
+
+[trader.telegram]
+enabled = true
+chat_id = -1003366848833                # same chat as ETH stack
+# bot_token from env: BSC_MEME_MEV_TRADER__TELEGRAM__BOT_TOKEN
+
+[trader.dex]
+# PancakeSwap canonical addresses (BSC mainnet).
+v2_factory = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
+v2_router = "0x10ED43C718714eb63d5aA57B78B54704E256024E"
+v3_factory = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865"
+v3_router = "0x13f4EA83D0bd40E75C8222255bc855a974568Dd4"
+v3_quoter_v2 = "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997"
+multicall3 = "0xcA11bde05977b3631167028862bE2a173976CA11"
+wbnb = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+# Fee tiers for V3 quoter scan order.
+v3_fee_tiers = [10000, 2500, 500, 100]
+# V2 is dominant on BSC — quote it first; fall back to V3 only if V2 has no pair.
+prefer_v2 = true
+
+[liquidator]
+# Venus protocol observer (Day 4 of roadmap). Disabled until then.
+enabled = false
+protocol = "venus"
+rpc_url = "http://127.0.0.1:8545"
+ledger_dir = "/data/bsc-meme-mev/liquidator"
+# Venus Comptroller
+comptroller = "0xfD36E2c2a6789Db23113685031d7F16329158384"
+poll_interval_secs = 10                  # BSC is 3-s blocks; poll faster
+watch_threshold = 1.05
+alert_cooldown_secs = 3600
+min_alert_bounty_usd = 50.0
+digest_interval_secs = 1800
+digest_top_n = 5
+
+[liquidator.telegram]
+enabled = true
+chat_id = -1003366848833
+# bot_token from env: BSC_MEME_MEV_LIQUIDATOR__TELEGRAM__BOT_TOKEN
+
+[four_meme]
+# BSC equivalent of Pump.fun. Bonding-curve memecoin launchpad.
+# Day 5 of roadmap — disabled until then.
+enabled = false
+launchpad = "0x5c952063c7fc8610FFDB798152D69F0B9550762b"   # verify on launch

@@ -1,0 +1,15 @@
+# BSC KOL watchlist. Format identical to ETH-side kols.toml.
+# Fill in addresses you want to track. Most ETH-side KOLs do NOT have BSC activity;
+# look for wallets that:
+#   - trade on PancakeSwap V2/V3
+#   - route via the GMGN proxy 0x1de460f363AF910f51726DEf188F9004276Bf4bc
+#   - launch / snipe Four.Meme bonding-curve tokens
+#
+# Discovery script (TODO): /scripts/discover-bsc-kols.sh — scans recent
+# PancakeSwap V2/V3 swaps > $X size to surface high-volume addresses.
+
+# Placeholder — populate before first live run.
+# [[kol]]
+# address = "0x..."
+# name = "..."
+# groups = ["GMGN"]
