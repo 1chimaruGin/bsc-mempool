@@ -11,6 +11,7 @@ use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 mod config;
+mod kol_watch;
 mod wiring;
 
 #[derive(Parser, Debug)]

@@ -85,6 +85,19 @@ pub async fn run(config_path: &Path) -> Result<()> {
         tracing::info!("capture sink enabled");
     }
 
+    // KOL watcher (Day 2). Subscribes to the bus, looks up `from` against
+    // kols.toml, fires Telegram alerts on hits. Trader sink stays None
+    // until Day 3.
+    if cfg.kol_watch.enabled {
+        let sub = pipeline.bus.subscribe("kol_watch");
+        let _ = crate::kol_watch::start(
+            cfg.kol_watch.clone(),
+            sub,
+            crate::kol_watch::Sinks::default(),
+            shutdown.clone(),
+        );
+    }
+
     // Spawn EL sources.
     spawn_sources(&cfg, &pipeline.raw_tx_in, &shutdown);
 
