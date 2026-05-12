@@ -82,7 +82,7 @@ else
 fi
 
 # ─── Phase 4: systemd unit ────────────────────────────────────────────────────
-SVC_SRC=/data/bsc-meme-mev/scripts/bsc-geth.service
+SVC_SRC=/data/bsc-meme-mev/scripts/systemd/bsc-geth.service
 SVC_DST=/etc/systemd/system/bsc-geth.service
 echo "[4/5] installing systemd unit → ${SVC_DST}"
 if [[ ! -f "${SVC_SRC}" ]]; then

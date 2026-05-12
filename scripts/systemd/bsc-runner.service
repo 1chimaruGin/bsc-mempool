@@ -1,0 +1,31 @@
+[Unit]
+Description=bsc-runner — BSC mempool listener + KOL watcher + paper trader
+Documentation=https://github.com/1chimaruGin/bsc-mempool
+After=bsc-geth.service network-online.target
+Wants=bsc-geth.service network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/data/bsc-meme-mev
+# Telegram bot token + chat id come from .env (root-only, gitignored).
+EnvironmentFile=-/data/bsc-meme-mev/.env
+# Map the friendly env names .env exports into the figment-prefixed names
+# the runner config layer reads. Empty defaults so we don't blow up if .env
+# is missing.
+ExecStart=/bin/bash -c '\
+    export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}" ; \
+    export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__CHAT_ID="${TELEGRAM_CHAT_ID:-}" ; \
+    export BSC_MEME_MEV_TRADER__TELEGRAM__BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}" ; \
+    exec /data/bsc-meme-mev/target/release/bsc-runner run \
+        --config /data/bsc-meme-mev/config/default.toml'
+Restart=on-failure
+RestartSec=5s
+LimitNOFILE=1048576
+TimeoutStopSec=30
+KillSignal=SIGINT
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
