@@ -45,16 +45,36 @@ pub async fn run(config_path: &Path) -> Result<()> {
     let pipeline_cfg = (&cfg.pipeline).into();
     let (pipeline, _handles) = build_pipeline(&pipeline_cfg, block_state.clone());
 
-    // Block oracle: WS subscription to newHeads on bsc-geth. Updates the
-    // shared CurrentBlockState so each PendingTx is stamped with the
-    // correct (block_number, parent_hash, ms_into_block).
+    // Head-state updater: WS subscription to newHeads on bsc-geth. Updates
+    // the shared CurrentBlockState so each PendingTx is stamped with the
+    // correct (block_number, parent_hash, ms_into_block). This is on the
+    // mempool hot path — keep it cheap.
     {
         let ws_url = cfg.block_oracle.el_ws_url.clone();
         let block_state = block_state.clone();
         let shutdown = shutdown.clone();
         tokio::spawn(async move {
-            if let Err(e) = run_block_oracle(ws_url, block_state, shutdown).await {
-                tracing::error!(error = %e, "block oracle terminated");
+            if let Err(e) = run_head_state_updater(ws_url, block_state, shutdown).await {
+                tracing::error!(error = %e, "head-state updater terminated");
+            }
+        });
+    }
+
+    // Block-coverage oracle: separate WS subscription that for every new
+    // block computes how many of its txs we saw in our mempool prior to
+    // inclusion. Pure observability — runs in parallel to the head-state
+    // updater. Emits `mempool_block_coverage_ratio` + per-tx lead-time
+    // histograms.
+    {
+        let oracle = bsc_telemetry::BlockOracle::new(bsc_telemetry::BlockOracleConfig {
+            el_ws_url: Some(cfg.block_oracle.el_ws_url.clone()),
+            aggregate_interval: Duration::from_secs(10),
+        })
+        .with_dedupe(pipeline.dedupe.clone());
+        let shutdown = shutdown.clone();
+        tokio::spawn(async move {
+            if let Err(e) = oracle.run(shutdown).await {
+                tracing::error!(error = %e, "block-coverage oracle terminated");
             }
         });
     }
@@ -125,7 +145,7 @@ pub async fn replay(path: &Path, _speed: f64) -> Result<()> {
 
 /// Subscribe to bsc-geth's `newHeads` over WS and feed `CurrentBlockState`.
 /// Reconnects on disconnect with exponential backoff.
-async fn run_block_oracle(
+async fn run_head_state_updater(
     ws_url: String,
     block_state: Arc<CurrentBlockState>,
     shutdown: CancellationToken,
@@ -136,7 +156,7 @@ async fn run_block_oracle(
         if shutdown.is_cancelled() {
             return Ok(());
         }
-        let res = run_block_oracle_once(&ws_url, block_state.clone(), shutdown.clone()).await;
+        let res = run_head_state_updater_once(&ws_url, block_state.clone(), shutdown.clone()).await;
         match res {
             Ok(()) => {
                 tracing::info!("block oracle WS ended; reconnecting");
@@ -156,7 +176,7 @@ async fn run_block_oracle(
     }
 }
 
-async fn run_block_oracle_once(
+async fn run_head_state_updater_once(
     ws_url: &str,
     block_state: Arc<CurrentBlockState>,
     shutdown: CancellationToken,
