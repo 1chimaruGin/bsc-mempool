@@ -14,7 +14,9 @@
 pub mod addresses;
 pub mod multicall;
 pub mod v2;
+pub mod v3;
 
 pub use addresses::*;
 pub use multicall::{Multicall3Call, Multicall3Result, aggregate3};
 pub use v2::{V2Quoter, V2QuoteError};
+pub use v3::{V3QuoteError, V3QuoteResult, V3Quoter};
