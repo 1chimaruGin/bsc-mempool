@@ -12,6 +12,7 @@ use std::path::PathBuf;
 
 mod config;
 mod kol_watch;
+mod trader;
 mod wiring;
 
 #[derive(Parser, Debug)]
