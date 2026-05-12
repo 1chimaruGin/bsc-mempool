@@ -168,6 +168,9 @@ pub(crate) struct KolHit {
     pub gas_limit: u64,
     pub nonce: u64,
     pub source_seen: String,
+    /// Raw tx calldata (input bytes). The trader's strategy decodes the
+    /// PancakeSwap V2 swap path from this without re-fetching the tx.
+    pub calldata: Vec<u8>,
     /// Human-readable decoded action when available. Filled by the trader's
     /// receipt decoder in Day 3; None on the raw mempool path.
     pub decoded: Option<String>,
@@ -205,6 +208,7 @@ impl KolHit {
             gas_limit: tx.gas_limit(),
             nonce: tx.nonce(),
             source_seen: format!("{:?}", p.source_seen),
+            calldata: input.to_vec(),
             decoded: None,
         }
     }

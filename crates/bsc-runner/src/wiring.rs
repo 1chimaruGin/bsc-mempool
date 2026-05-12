@@ -105,18 +105,36 @@ pub async fn run(config_path: &Path) -> Result<()> {
         tracing::info!("capture sink enabled");
     }
 
+    // Token resolver — shared between KOL watcher (future decoded action
+    // lookups) and the paper trader (symbol/decimals on entry).
+    let resolver = std::sync::Arc::new(crate::token_resolver::TokenResolver::new(
+        cfg.trader.rpc_url.clone(),
+    ));
+
+    // Trader (Day 3). Spawn first so we can plug its hit_tx into kol_watch's
+    // sinks. If disabled, trader_handles is None and the kol_watch sink
+    // gets no trader entry.
+    let trader_handles =
+        crate::trader::start(cfg.trader.clone(), resolver.clone(), shutdown.clone());
+    let trader_sink = trader_handles.as_ref().map(|h| h.hit_tx.clone());
+
     // KOL watcher (Day 2). Subscribes to the bus, looks up `from` against
-    // kols.toml, fires Telegram alerts on hits. Trader sink stays None
-    // until Day 3.
+    // kols.toml, fires Telegram alerts on hits. Trader sink is now plugged
+    // in so every hit fans out to both Telegram and the paper trader.
     if cfg.kol_watch.enabled {
         let sub = pipeline.bus.subscribe("kol_watch");
         let _ = crate::kol_watch::start(
             cfg.kol_watch.clone(),
             sub,
-            crate::kol_watch::Sinks::default(),
+            crate::kol_watch::Sinks {
+                telegram: None, // wired internally by kol_watch::start
+                trader: trader_sink,
+            },
             shutdown.clone(),
         );
     }
+    // Keep trader handles alive for the runner lifetime.
+    let _ = trader_handles;
 
     // Spawn EL sources.
     spawn_sources(&cfg, &pipeline.raw_tx_in, &shutdown);

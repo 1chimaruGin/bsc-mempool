@@ -12,6 +12,7 @@ use std::path::PathBuf;
 
 mod config;
 mod kol_watch;
+mod token_resolver;
 mod trader;
 mod wiring;
 
