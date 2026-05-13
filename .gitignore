@@ -37,3 +37,4 @@ __pycache__/
 # misc
 .DS_Store
 Thumbs.db
+/snapshot-cache/
