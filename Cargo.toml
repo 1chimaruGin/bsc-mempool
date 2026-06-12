@@ -20,6 +20,9 @@ alloy = { version = "2", default-features = false, features = [
     "network",
     "serde",
     "rpc-types-eth",
+    "signer-local",
+    "signers",
+    "sol-types",
 ] }
 
 # tokio runtime

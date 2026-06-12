@@ -114,14 +114,79 @@ pub async fn run(config_path: &Path) -> Result<()> {
     // Trader (Day 3). Spawn first so we can plug its hit_tx into kol_watch's
     // sinks. If disabled, trader_handles is None and the kol_watch sink
     // gets no trader entry.
+    // Public-path PAPER trader. Disabled by default in default.toml when
+    // we go live; kept available so we can re-enable for comparison.
     let trader_handles =
-        crate::trader::start(cfg.trader.clone(), resolver.clone(), shutdown.clone());
+        crate::trader::start(cfg.trader.clone(), resolver.clone(), shutdown.clone(), false).await;
     let trader_sink = trader_handles.as_ref().map(|h| h.hit_tx.clone());
+
+    // SEPARATE private-confirmed paper trader (own ledger/telegram/book).
+    // Same story — disabled by default for live mode.
+    let trader_private =
+        crate::trader::start(cfg.trader_private.clone(), resolver.clone(), shutdown.clone(), false).await;
+
+    // Real-time Four.Meme bonding-curve price feed. Single WS subscription
+    // on the launchpad's TradeBuy event populates a shared cache that the
+    // KOL trail + sniper trail consume on every block — fixes the
+    // eth_getLogs-timeout blindness that caused 3/4 positions to ride
+    // 4000-block timeouts on 2026-06-03.
+    let price_cache       = crate::four_meme_price::new_cache();
+    let price_cache_stats = crate::four_meme_price::new_stats_cache();
+    crate::four_meme_price::start(
+        price_cache.clone(),
+        price_cache_stats.clone(),
+        cfg.block_oracle.el_ws_url.clone(),
+        shutdown.clone(),
+    );
+
+    // LIVE trader — standalone consumer. Reads config/limits.toml + wallet
+    // from .env. In SHADOW mode signs every passing decision and writes to
+    // the live ledger but never broadcasts.
+    let live_sink = crate::trader::start_live_only(
+        &cfg.trader,
+        cfg.adaptive_trail.clone(),
+        price_cache.clone(),
+        price_cache_stats.clone(),
+        shutdown.clone(),
+    ).await;
+    let private_sink = trader_private.as_ref().map(|h| h.hit_tx.clone());
+
+    // Phase 2 — per-token flow tape + Phase 3 — price/liquidity oracle.
+    // Both monitor the shared held-set the trader maintains. Only start
+    // when the trader is running (no positions ⇒ nothing to monitor).
+    if let Some(h) = trader_handles.as_ref() {
+        let flow_sub = pipeline.bus.subscribe("token_flow");
+        crate::token_flow::start(h.held.clone(), flow_sub, shutdown.clone());
+        crate::price_oracle::start(
+            h.held.clone(),
+            cfg.trader.rpc_url.clone(),
+            shutdown.clone(),
+        );
+    }
 
     // KOL watcher (Day 2). Subscribes to the bus, looks up `from` against
     // kols.toml, fires Telegram alerts on hits. Trader sink is now plugged
     // in so every hit fans out to both Telegram and the paper trader.
     if cfg.kol_watch.enabled {
+        // Confirm registry: kol_watch registers each pending hit; the
+        // kol_confirm watcher matches it against newHeads and emits a
+        // CONFIRMED line + lead-time when it lands in a block.
+        let confirm = crate::kol_confirm::ConfirmRegistry::new();
+        let kol_file = if cfg.kol_watch.file.is_empty() {
+            "config/kols.toml".to_string()
+        } else {
+            cfg.kol_watch.file.clone()
+        };
+        crate::kol_confirm::start(
+            confirm.clone(),
+            cfg.block_oracle.el_ws_url.clone(),
+            kol_file,
+            cfg.kol_watch.groups.clone(),
+            trader_sink.clone(),
+            private_sink.clone(),
+            live_sink.clone(),
+            shutdown.clone(),
+        );
         let sub = pipeline.bus.subscribe("kol_watch");
         let _ = crate::kol_watch::start(
             cfg.kol_watch.clone(),
@@ -129,12 +194,41 @@ pub async fn run(config_path: &Path) -> Result<()> {
             crate::kol_watch::Sinks {
                 telegram: None, // wired internally by kol_watch::start
                 trader: trader_sink,
+                live: live_sink,
+                confirm: Some(confirm),
             },
+            Some(resolver.clone()),
             shutdown.clone(),
         );
     }
-    // Keep trader handles alive for the runner lifetime.
+    // Keep both trader instances alive for the runner lifetime.
     let _ = trader_handles;
+    let _ = trader_private;
+
+    // Venus liquidation health watcher (Phase 1, READ-ONLY). Config-gated
+    // (`[liquidator] enabled`); disabled by default — never sends a tx.
+    crate::venus::start(cfg.liquidator.clone(), shutdown.clone());
+
+    // Dev launchpad sniper. Independent module. Config-gated; paper-mode
+    // by default so it can run safely without the live executor wired.
+    {
+        // Build a BnbPrice oracle (sniper needs USD→BNB at trade time).
+        // Cheap to construct; can share with trader's if desired.
+        let bnb_price = std::sync::Arc::new(
+            crate::bnb_price::BnbPrice::new(cfg.trader.rpc_url.clone()),
+        );
+        // Sniper can call into the live executor when mode=live, but only
+        // if it exists. In paper mode it ignores this.
+        let live_for_sniper: Option<std::sync::Arc<crate::trader::executor_live::LiveExecutor>> = None;
+        crate::dev_sniper::start(
+            cfg.dev_sniper.clone(),
+            cfg.sniper_trail.clone(),
+            price_cache.clone(),
+            live_for_sniper,
+            bnb_price,
+            shutdown.clone(),
+        );
+    }
 
     // Spawn EL sources.
     spawn_sources(&cfg, &pipeline.raw_tx_in, &shutdown);

@@ -10,7 +10,17 @@ use anyhow::Result;
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
+mod bnb_price;
 mod config;
+mod dev_sniper;
+mod four_meme_price;
+mod gmgn;
+mod held_tokens;
+mod kol_confirm;
+mod mcap;
+mod price_oracle;
+mod token_flow;
+mod venus;
 mod kol_watch;
 mod token_resolver;
 mod trader;

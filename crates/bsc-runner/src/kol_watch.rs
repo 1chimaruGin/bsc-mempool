@@ -20,8 +20,12 @@
 //! measure lead-time and missed flow.
 
 use crate::config::{KolWatchConfig, TelegramConfig};
+use crate::gmgn;
+use crate::kol_confirm::{ConfirmRegistry, PendingMeta};
+use crate::token_resolver::TokenResolver;
 use alloy::consensus::Transaction;
 use alloy::primitives::Address;
+use bsc_bus::current_block::unix_now_ns;
 use anyhow::{Context, Result};
 use bsc_bus::Subscription;
 use bsc_core::PendingTx;
@@ -53,6 +57,7 @@ struct KolFile {
     kol: Vec<Kol>,
 }
 
+#[derive(Default)]
 pub(crate) struct KolIndex {
     by_address: HashMap<Address, Kol>,
 }
@@ -104,6 +109,9 @@ fn known_method(input: &[u8]) -> Option<&'static str> {
     match &input[..4] {
         // GMGN aggregator (same selector as ETH; GMGN exists on BSC too).
         [0xef, 0xfb, 0xec, 0x13] => Some("GMGN swap"),
+        // GMGN universal router on BSC — routes flap AMM & Four.Meme buys.
+        // value>0 = BNB-in buy; tokenOut is calldata word[9].
+        [0x4d, 0x81, 0x9a, 0x2a] => Some("GMGN router (flap/Four.Meme)"),
         // PancakeSwap V2 (UniV2-fork selectors).
         [0x7f, 0xf3, 0x6a, 0xb5] => Some("PancakeV2 swapExactBNBForTokens"),
         [0x18, 0xcb, 0xaf, 0xe5] => Some("PancakeV2 swapExactTokensForBNB"),
@@ -174,6 +182,23 @@ pub(crate) struct KolHit {
     /// Human-readable decoded action when available. Filled by the trader's
     /// receipt decoder in Day 3; None on the raw mempool path.
     pub decoded: Option<String>,
+    /// Traded token (GMGN `0x4d819a2a` decode). `None` for non-GMGN methods.
+    pub token: Option<Address>,
+    /// Trade direction: "BUY" / "SELL" (GMGN). `None` when not derivable.
+    pub side: Option<&'static str>,
+    /// Block in which the KOL's tx was mined. `Some(n)` for hits from
+    /// `kol_confirm` (confirmed); `None` for pending-mempool hits where
+    /// the block is not yet known. Used by the paper trader to query
+    /// `balanceOf(kol, token)` pre-/post-sell for proportional exits.
+    pub confirmed_block: Option<u64>,
+    /// Channel this hit was observed on:
+    ///   - `"public"`  — seen in public mempool BEFORE inclusion (kol_watch
+    ///     pending source, OR kol_confirm matching a prior pending record)
+    ///   - `"private"` — observed only after inclusion (kol_confirm, KOL
+    ///     bypassed public mempool via private relay / direct-to-builder)
+    /// The live executor uses this to switch the per-trade size between
+    /// `trade_size_usd` (public) and `trade_size_private_usd` (private).
+    pub visibility: &'static str,
 }
 
 impl KolHit {
@@ -189,6 +214,10 @@ impl KolHit {
         };
         let value_wei = tx.value();
         let value_bnb = wei_to_bnb(value_wei);
+        let (token, side) = match gmgn::decode(input.as_ref(), value_wei) {
+            Some(s) => (Some(s.token), Some(s.side.as_str())),
+            None => (None, None),
+        };
         let gas_price_gwei = tx
             .gas_price()
             .map(wei_to_gwei)
@@ -210,6 +239,10 @@ impl KolHit {
             source_seen: format!("{:?}", p.source_seen),
             calldata: input.to_vec(),
             decoded: None,
+            token,
+            side,
+            confirmed_block: None,
+            visibility: "public",
         }
     }
 }
@@ -247,6 +280,14 @@ fn wei_to_gwei(wei: u128) -> f64 {
 pub(crate) struct Sinks {
     pub telegram: Option<mpsc::Sender<KolHit>>,
     pub trader: Option<mpsc::Sender<KolHit>>,
+    /// Live (real-money) trader sink — receives a clone of every hit
+    /// alongside the paper trader. Runs through its own consumer so we
+    /// can disable the paper one without breaking the live path.
+    pub live: Option<mpsc::Sender<KolHit>>,
+    /// Confirm registry — every pending hit is registered so the
+    /// `kol_confirm` watcher can emit a CONFIRMED line + lead-time when it
+    /// lands in a block.
+    pub confirm: Option<Arc<ConfirmRegistry>>,
 }
 
 /// Start the mempool-side KOL watcher. Spawns:
@@ -259,6 +300,7 @@ pub fn start(
     cfg: KolWatchConfig,
     sub: Subscription,
     extra_sinks: Sinks,
+    resolver: Option<Arc<TokenResolver>>,
     shutdown: CancellationToken,
 ) -> Option<Arc<KolIndex>> {
     if !cfg.enabled {
@@ -301,7 +343,12 @@ pub fn start(
             drop(tg_rx);
             None
         } else {
-            spawn_telegram_dispatcher(cfg.telegram.clone(), tg_rx, shutdown.clone());
+            spawn_telegram_dispatcher(
+                cfg.telegram.clone(),
+                tg_rx,
+                resolver.clone(),
+                shutdown.clone(),
+            );
             Some(tg_tx)
         }
     } else {
@@ -312,6 +359,8 @@ pub fn start(
     let sinks = Arc::new(Sinks {
         telegram: telegram_sink,
         trader: extra_sinks.trader,
+        live: extra_sinks.live,
+        confirm: extra_sinks.confirm,
     });
 
     {
@@ -364,6 +413,28 @@ fn process_one(index: &KolIndex, p: &PendingTx, sinks: &Sinks) {
         return;
     };
     let hit = KolHit::from_pending(kol, p);
+    // Register for confirm-watching BEFORE dispatch so a fast block can't
+    // race ahead of the insert. Only TRADES are confirm-tracked: a decoded
+    // `side` means the GMGN decoder recognised a swap. Plain approves /
+    // transfers stay PENDING-only (no useless `?/?` CONFIRMED noise).
+    if let (Some(reg), Some(side)) = (&sinks.confirm, hit.side) {
+        reg.register(
+            p.hash,
+            PendingMeta {
+                kol_name: hit.kol_name.clone(),
+                side: Some(side),
+                token: hit.token,
+                first_seen_ns: p.first_seen_ns,
+                registered_ns: unix_now_ns(),
+                seen_block: p.block_context.as_ref().map(|b| b.block_number),
+                ms_into_block: p
+                    .block_context
+                    .as_ref()
+                    .map(|b| b.ms_into_block)
+                    .unwrap_or(0),
+            },
+        );
+    }
     fire_hit(hit, sinks);
 }
 
@@ -381,6 +452,8 @@ pub(crate) fn fire_hit(hit: KolHit, sinks: &Sinks) {
         to_label = ?hit.to_label,
         method_id = %hit.method_id,
         method_label = ?hit.method_label,
+        side = hit.side.unwrap_or("-"),
+        token = %hit.token.map(|t| format!("{t:#x}")).unwrap_or_else(|| "-".into()),
         decoded = ?hit.decoded,
         value_bnb = hit.value_bnb,
         gas_price_gwei = hit.gas_price_gwei,
@@ -407,10 +480,19 @@ pub(crate) fn fire_hit(hit: KolHit, sinks: &Sinks) {
         }
     }
     if let Some(tr) = &sinks.trader {
-        match tr.try_send(hit) {
+        match tr.try_send(hit.clone()) {
             Ok(_) => {}
             Err(mpsc::error::TrySendError::Full(_)) => {
                 metrics::counter!("bsc_trader_dropped_total").increment(1);
+            }
+            Err(mpsc::error::TrySendError::Closed(_)) => {}
+        }
+    }
+    if let Some(lv) = &sinks.live {
+        match lv.try_send(hit) {
+            Ok(_) => {}
+            Err(mpsc::error::TrySendError::Full(_)) => {
+                metrics::counter!("bsc_trader_live_dropped_total").increment(1);
             }
             Err(mpsc::error::TrySendError::Closed(_)) => {}
         }
@@ -424,6 +506,7 @@ pub(crate) fn fire_hit(hit: KolHit, sinks: &Sinks) {
 fn spawn_telegram_dispatcher(
     cfg: TelegramConfig,
     rx: mpsc::Receiver<KolHit>,
+    resolver: Option<Arc<TokenResolver>>,
     shutdown: CancellationToken,
 ) {
     std::thread::Builder::new()
@@ -441,7 +524,7 @@ fn spawn_telegram_dispatcher(
                 }
             };
             rt.block_on(async move {
-                run_telegram(cfg, rx, shutdown).await;
+                run_telegram(cfg, rx, resolver, shutdown).await;
             });
         })
         .expect("spawn kol-telegram thread");
@@ -450,6 +533,7 @@ fn spawn_telegram_dispatcher(
 async fn run_telegram(
     cfg: TelegramConfig,
     mut rx: mpsc::Receiver<KolHit>,
+    resolver: Option<Arc<TokenResolver>>,
     shutdown: CancellationToken,
 ) {
     let client = match reqwest::Client::builder()
@@ -473,14 +557,30 @@ async fn run_telegram(
             }
             maybe = rx.recv() => {
                 let Some(hit) = maybe else { return };
-                send_one(&client, &url, cfg.chat_id, &hit).await;
+                // Resolve token symbol off the hot path (this dispatcher is
+                // an isolated thread+runtime; an eth_call here can't slow the
+                // mempool consumer).
+                let token_label = match (&resolver, hit.token) {
+                    (Some(r), Some(addr)) => r
+                        .lookup(addr)
+                        .await
+                        .map(|ti| ti.symbol.clone()),
+                    _ => None,
+                };
+                send_one(&client, &url, cfg.chat_id, &hit, token_label.as_deref()).await;
             }
         }
     }
 }
 
-async fn send_one(client: &reqwest::Client, url: &str, chat_id: i64, hit: &KolHit) {
-    let text = format_telegram_html(hit);
+async fn send_one(
+    client: &reqwest::Client,
+    url: &str,
+    chat_id: i64,
+    hit: &KolHit,
+    token_label: Option<&str>,
+) {
+    let text = format_telegram_html(hit, token_label);
     let keyboard = build_inline_keyboard(hit);
     let payload = serde_json::json!({
         "chat_id": chat_id,
@@ -589,7 +689,7 @@ fn now_hms_utc() -> String {
     format!("{:02}:{:02}:{:02} UTC", h, m, s)
 }
 
-fn format_telegram_html(h: &KolHit) -> String {
+fn format_telegram_html(h: &KolHit, token_label: Option<&str>) -> String {
     let kol = html_escape(&h.kol_name);
     let kol_emoji = h.kol_emoji.as_deref().unwrap_or("🐐");
     let group = h
@@ -606,13 +706,37 @@ fn format_telegram_html(h: &KolHit) -> String {
     let action = action_emoji(h.method_label);
     let method = html_escape(h.method_label.unwrap_or(&h.method_id));
 
+    // BUY/SELL banner (GMGN-decoded). 🟩 buy / 🟥 sell.
+    let side_part = match h.side {
+        Some("BUY") => "🟩 <b>BUY</b> ".to_string(),
+        Some("SELL") => "🟥 <b>SELL</b> ".to_string(),
+        _ => String::new(),
+    };
+
     let value_part = format_value(h.value_bnb);
     let mut body = String::new();
-    body.push_str(&format!("{} <b>{}</b>", action, method));
+    body.push_str(&format!("{}{} <b>{}</b>", side_part, action, method));
     if let Some(v) = value_part {
         body.push_str(&format!(" — {}", html_escape(&v)));
     }
     body.push_str(&format!(" · {}", html_escape(&format_gwei(h.gas_price_gwei))));
+
+    // Token line: symbol (resolved) + short address + chart link.
+    let token_line = match h.token {
+        Some(addr) => {
+            let a = format!("{addr:#x}");
+            let sym = token_label
+                .map(|s| format!("<b>{}</b> ", html_escape(s)))
+                .unwrap_or_default();
+            format!(
+                "\n🎯 {}<a href=\"https://gmgn.ai/bsc/token/{}\">{}</a>",
+                sym,
+                a,
+                short_addr(&a),
+            )
+        }
+        None => String::new(),
+    };
 
     let decoded = match &h.decoded {
         Some(d) => format!("\n💎 <b>{}</b>", html_escape(d)),
@@ -631,8 +755,8 @@ fn format_telegram_html(h: &KolHit) -> String {
     );
 
     format!(
-        "🟢 <b>PENDING</b> · BSC\n\n{} <b>KOL {}</b>{}\n{}{}{}\n{}",
-        kol_emoji, kol, group_part, body, decoded, dest, meta,
+        "🟢 <b>PENDING</b> · BSC\n\n{} <b>KOL {}</b>{}\n{}{}{}{}\n{}",
+        kol_emoji, kol, group_part, body, token_line, decoded, dest, meta,
     )
 }
 
