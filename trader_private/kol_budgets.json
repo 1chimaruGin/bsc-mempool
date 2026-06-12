@@ -1,0 +1,119 @@
+{
+  "H": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9978379443717008,
+    "committed_wei": 0,
+    "realized_pnl_wei": -290021620556282992,
+    "trades_taken": 142,
+    "trades_skipped_budget": 65,
+    "last_updated_ns": 1781181531776135655
+  },
+  "G": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9177780935298297,
+    "committed_wei": 2809106964181983,
+    "realized_pnl_wei": -288013112100519720,
+    "trades_taken": 127,
+    "trades_skipped_budget": 98,
+    "last_updated_ns": 1781152642384964148
+  },
+  "M": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9397149076304870,
+    "committed_wei": 29984915406269824,
+    "realized_pnl_wei": -260617935517425306,
+    "trades_taken": 230,
+    "trades_skipped_budget": 101,
+    "last_updated_ns": 1781208868422826114
+  },
+  "O": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 1061804907200279402,
+    "committed_wei": 490777966887819254,
+    "realized_pnl_wei": 1252582874088098656,
+    "trades_taken": 269,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1781189979805761121
+  },
+  "A": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9216938235294512,
+    "committed_wei": 27299822081659155,
+    "realized_pnl_wei": -263483239683046333,
+    "trades_taken": 299,
+    "trades_skipped_budget": 1058,
+    "last_updated_ns": 1781236443197998696
+  },
+  "K": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 920164598992468362,
+    "committed_wei": 0,
+    "realized_pnl_wei": 620164598992468362,
+    "trades_taken": 21,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1781103687700777760
+  },
+  "I": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 236212055507042537,
+    "committed_wei": 0,
+    "realized_pnl_wei": -63787944492957463,
+    "trades_taken": 9,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1780228868899392966
+  },
+  "B": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9385033754983183,
+    "committed_wei": 42604706616421854,
+    "realized_pnl_wei": -248010259628594963,
+    "trades_taken": 139,
+    "trades_skipped_budget": 80,
+    "last_updated_ns": 1781168495148003442
+  },
+  "D": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 754846862014316479,
+    "committed_wei": 34541634265114305,
+    "realized_pnl_wei": 489388496279430784,
+    "trades_taken": 84,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1781237187580883199
+  },
+  "L": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 293365362000018690,
+    "committed_wei": 28759783872021868,
+    "realized_pnl_wei": 22125145872040558,
+    "trades_taken": 42,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1781157394759269100
+  },
+  "C": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 83395715878132425,
+    "committed_wei": 58444168149974122,
+    "realized_pnl_wei": -158160115971893453,
+    "trades_taken": 93,
+    "trades_skipped_budget": 0,
+    "last_updated_ns": 1781190092279565234
+  },
+  "N": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 14460879182990883,
+    "committed_wei": 4081224707377051,
+    "realized_pnl_wei": -281457896109632066,
+    "trades_taken": 195,
+    "trades_skipped_budget": 34,
+    "last_updated_ns": 1781203278779163163
+  },
+  "E": {
+    "initial_wei": 300000000000000000,
+    "cash_wei": 9462518476164925,
+    "committed_wei": 0,
+    "realized_pnl_wei": -290537481523835075,
+    "trades_taken": 112,
+    "trades_skipped_budget": 73,
+    "last_updated_ns": 1781195515676282723
+  }
+}

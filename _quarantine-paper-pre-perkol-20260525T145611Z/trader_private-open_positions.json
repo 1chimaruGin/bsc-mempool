@@ -1,0 +1,886 @@
+[
+  {
+    "portfolio": "FastTip",
+    "kol_name": "G",
+    "token_address": "0x94b3c2422860316602de946512644ea407d34444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x1b5823e7d51179e77583",
+    "opened_at_block": 99737410,
+    "opened_at_unix_ns": 1779471292620043641,
+    "last_added_block": 99737410,
+    "buy_tx_hashes": [
+      "0x0a4a1e17dcc776306adc35ee4a87f03e6899a64659ca142b3eb0e1c11689903c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xaa2be3b13801c0c21138d6c0825731ff1d974444",
+    "token_symbol": "克拉奇",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x8de5d13eb4a8428d1fb1",
+    "opened_at_block": 99807914,
+    "opened_at_unix_ns": 1779471292620053891,
+    "last_added_block": 99807914,
+    "buy_tx_hashes": [
+      "0x64bc1ab1b32978c1910d9c9c189035b05a8329ddadd0a90f2f2e6f14a65f846b"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xd45ff38d132114968091f154cdcc0dfea06b4444",
+    "token_symbol": "Exchange the world",
+    "token_decimals": 18,
+    "bnb_in": "0x16345785d8a0000",
+    "tokens_held": "0x1f20f8118d53c0a59bdb",
+    "opened_at_block": 99635374,
+    "opened_at_unix_ns": 1779471292620042391,
+    "last_added_block": 99635374,
+    "buy_tx_hashes": [
+      "0xfde3a3adf0982e11c10975a5b2cd9c77e20cdebbec7263ad5d77b04977ebde4d"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x0d12fd5f02dec8de7b996fefe0a66cb541ae4444",
+    "token_symbol": "正念之城",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x2ce8d402bf3e3a0000000",
+    "opened_at_block": 99751844,
+    "opened_at_unix_ns": 1779471292620046411,
+    "last_added_block": 99751844,
+    "buy_tx_hashes": [
+      "0x7d7e025394562faa495a67fc6a74da54b45427bd471845fd35a3d754a40e7ff1"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "O",
+    "token_address": "0x7b0e2e31a280054ba591b950e9f72048a1d14444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0x7c585087238000",
+    "tokens_held": "0x214d01247416e20000000",
+    "opened_at_block": 99735980,
+    "opened_at_unix_ns": 1779471292620051581,
+    "last_added_block": 99735980,
+    "buy_tx_hashes": [
+      "0xb03126293333d4ed0b3a4e007955be067be2640673da78e8b43fe77ff3380fba"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xcc37d31e1086f135f30c8eddd0b672c42bd98888",
+    "token_symbol": "足球",
+    "token_decimals": 18,
+    "bnb_in": "0x17508f1956a8000",
+    "tokens_held": "0xcdd99ff168a326666666",
+    "opened_at_block": 99746311,
+    "opened_at_unix_ns": 1779471292620052311,
+    "last_added_block": 99746311,
+    "buy_tx_hashes": [
+      "0xa2feee3865f2fde8545b58877da08c9209814285c1219fff2a4e10368a099064"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "M",
+    "token_address": "0x205f39c39f5fe15d4ef000aeb835de8deb264444",
+    "token_symbol": "14",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x44c003b3a9522eae11a6",
+    "opened_at_block": 99748607,
+    "opened_at_unix_ns": 1779471292620062481,
+    "last_added_block": 99748607,
+    "buy_tx_hashes": [
+      "0xe03dd67044ad685234789392891b7be85b578500db6e4d99093e5e3654fa63a2"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xf30b8622a4bc0fa4ef5135923fe8837d82204444",
+    "token_symbol": "小龙人",
+    "token_decimals": 18,
+    "bnb_in": "0x737693eb334000",
+    "tokens_held": "0x147321c2d6651d3215518",
+    "opened_at_block": 99803451,
+    "opened_at_unix_ns": 1779471292620063561,
+    "last_added_block": 99803451,
+    "buy_tx_hashes": [
+      "0x9cd4abb693b220d8bfa45ba00e40a8cc1cfa0b4ea1695ba2ad7bf04bdc6667f0"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x94b3c2422860316602de946512644ea407d34444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x206298741b6ed6b66a61",
+    "opened_at_block": 99801569,
+    "opened_at_unix_ns": 1779471292620054061,
+    "last_added_block": 99801569,
+    "buy_tx_hashes": [
+      "0xeb7e31bcc1f11db536a2d8c72c56d58211525cc0d43cc5c9a8bbb13c32990044"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x8ed916bd7734a370a76b2da1aef3db38341e4444",
+    "token_symbol": "胖蛋",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x20faa2c3e7a49a0000000",
+    "opened_at_block": 99789520,
+    "opened_at_unix_ns": 1779471292620062311,
+    "last_added_block": 99789520,
+    "buy_tx_hashes": [
+      "0xea0c72eaad6008874e87250e81c95507d4b1f3bb022f3f30a70140c81c69b619"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x0352b5401c4d8bcb40bf17cc5e139935109a4444",
+    "token_symbol": "给阿嬷的情书",
+    "token_decimals": 18,
+    "bnb_in": "0x737693eb334000",
+    "tokens_held": "0x8c15a6ad17d109a7d173",
+    "opened_at_block": 99796318,
+    "opened_at_unix_ns": 1779471292620065101,
+    "last_added_block": 99796318,
+    "buy_tx_hashes": [
+      "0xa81227f28ffab5b6827ac10df5c5c18dad2f6674451ab8c3135d3c65eb3542ab"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d",
+    "token_symbol": "USD1",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x137d3f37172fbbea0",
+    "opened_at_block": 99786964,
+    "opened_at_unix_ns": 1779471292620052651,
+    "last_added_block": 99786964,
+    "buy_tx_hashes": [
+      "0x5fe3cb99f7ebd04bc5e950cda61e97ffe1bd0a0373eb5ff91e87ac1d5b531990"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x671ecbcb89ee3f85e2199294e723d309d98c4444",
+    "token_symbol": "哭哭马",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x356fe7272e74155e476",
+    "opened_at_block": 99797069,
+    "opened_at_unix_ns": 1779471292620053201,
+    "last_added_block": 99797069,
+    "buy_tx_hashes": [
+      "0xae1e57fa46442c745f393b2034aba2ff77461f7896b65c78eb0b5d3bc110bd91"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xe683a48df543d68ed96d53dd1fda73ccbd144444",
+    "token_symbol": "Fight",
+    "token_decimals": 18,
+    "bnb_in": "0xf195a3c4ba0000",
+    "tokens_held": "0x7d90c65118ee62097b9e",
+    "opened_at_block": 99716133,
+    "opened_at_unix_ns": 1779471292620047031,
+    "last_added_block": 99716133,
+    "buy_tx_hashes": [
+      "0x6007c2b9530837cc100cb02866e97d5f938498eeb18ada69eafd50369db16a64"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x30040d9fc9e57cb366df0ecac06a6f73c39b4444",
+    "token_symbol": "Distorted",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x14408ea87b1d3ffbc8bcd",
+    "opened_at_block": 99716440,
+    "opened_at_unix_ns": 1779471292620053371,
+    "last_added_block": 99716440,
+    "buy_tx_hashes": [
+      "0xd25a46454c78932415817798515d303b565de428c106044f2097b485180cfae2"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xcc37d31e1086f135f30c8eddd0b672c42bd98888",
+    "token_symbol": "足球",
+    "token_decimals": 18,
+    "bnb_in": "0x17508f1956a8000",
+    "tokens_held": "0xcdd99ff168a326666666",
+    "opened_at_block": 99746311,
+    "opened_at_unix_ns": 1779471292620046601,
+    "last_added_block": 99746311,
+    "buy_tx_hashes": [
+      "0xa2feee3865f2fde8545b58877da08c9209814285c1219fff2a4e10368a099064"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x8d0d000ee44948fc98c9b98a4fa4921476f08b0d",
+    "token_symbol": "USD1",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x137d3f37172fbbea0",
+    "opened_at_block": 99786964,
+    "opened_at_unix_ns": 1779471292620062131,
+    "last_added_block": 99786964,
+    "buy_tx_hashes": [
+      "0x5fe3cb99f7ebd04bc5e950cda61e97ffe1bd0a0373eb5ff91e87ac1d5b531990"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "K",
+    "token_address": "0x590d543d9353dc75637a58b8c008fcecf5344444",
+    "token_symbol": "🔶 BNB",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0xca3c32f14b7daa10d6ad",
+    "opened_at_block": 99714390,
+    "opened_at_unix_ns": 1779471292620064071,
+    "last_added_block": 99714390,
+    "buy_tx_hashes": [
+      "0x5a47685b220f6e2c8464eddb4d58f5158ec964851870c8b33b03bee61052a947"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x40666dbeb55caecbc4b7fb541c32fddd90fc4444",
+    "token_symbol": "Fight",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x331def0d24296e9daab5c",
+    "opened_at_block": 99716095,
+    "opened_at_unix_ns": 1779471292620051921,
+    "last_added_block": 99716095,
+    "buy_tx_hashes": [
+      "0xf2c60e640b3da89df9afef42fc263ac4d32d4513e890dd56bb8790184197115c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xd540d5e502fc958f43606db30e22b125003d4444",
+    "token_symbol": "FWC",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0xc5b67da53fd99eb851eb",
+    "opened_at_block": 99799826,
+    "opened_at_unix_ns": 1779471292620064581,
+    "last_added_block": 99799826,
+    "buy_tx_hashes": [
+      "0x6fc162c94a8a52f87440abf17dd81e18de6f7aba76e5c2aa8f490f60cba9743a"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xf30b8622a4bc0fa4ef5135923fe8837d82204444",
+    "token_symbol": "小龙人",
+    "token_decimals": 18,
+    "bnb_in": "0x737693eb334000",
+    "tokens_held": "0x147321c2d6651d3215518",
+    "opened_at_block": 99803451,
+    "opened_at_unix_ns": 1779471292620064741,
+    "last_added_block": 99803451,
+    "buy_tx_hashes": [
+      "0x9cd4abb693b220d8bfa45ba00e40a8cc1cfa0b4ea1695ba2ad7bf04bdc6667f0"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x40666dbeb55caecbc4b7fb541c32fddd90fc4444",
+    "token_symbol": "Fight",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x331def0d24296e9daab5c",
+    "opened_at_block": 99716095,
+    "opened_at_unix_ns": 1779471292620064411,
+    "last_added_block": 99716095,
+    "buy_tx_hashes": [
+      "0xf2c60e640b3da89df9afef42fc263ac4d32d4513e890dd56bb8790184197115c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x7bc284b12851d8cacf81d907c1bdda85b0794444",
+    "token_symbol": "正﻿念之城",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x39d2c5819a65d5c28f5c2",
+    "opened_at_block": 99751858,
+    "opened_at_unix_ns": 1779471292620064921,
+    "last_added_block": 99751858,
+    "buy_tx_hashes": [
+      "0x8c8cf55b07690a8494a4a25747770f7d7bd42c75a68e97dfc3f3fdcfbc6e5a07"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x32a4bac74904e9d031c5d8e9262f69d30130c3cf",
+    "token_symbol": "MINIONS",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x398fb7782ce81d0b169b8",
+    "opened_at_block": 99813394,
+    "opened_at_unix_ns": 1779471362951846906,
+    "last_added_block": 99813394,
+    "buy_tx_hashes": [
+      "0xc7b08920111257ca16c05ef65c3e3cc7f0ea27a78077322d1750ba04838a887c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xd45ff38d132114968091f154cdcc0dfea06b4444",
+    "token_symbol": "Exchange the world",
+    "token_decimals": 18,
+    "bnb_in": "0x16345785d8a0000",
+    "tokens_held": "0x1f20f8118d53c0a59bdb",
+    "opened_at_block": 99635374,
+    "opened_at_unix_ns": 1779471292620047251,
+    "last_added_block": 99635374,
+    "buy_tx_hashes": [
+      "0xfde3a3adf0982e11c10975a5b2cd9c77e20cdebbec7263ad5d77b04977ebde4d"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "O",
+    "token_address": "0x708559dfa8fcc534c953d63de933254a10c04444",
+    "token_symbol": "4GUY",
+    "token_decimals": 18,
+    "bnb_in": "0x7c585087238000",
+    "tokens_held": "0x22aed95b0724241e1c950",
+    "opened_at_block": 99776540,
+    "opened_at_unix_ns": 1779471292620063891,
+    "last_added_block": 99776540,
+    "buy_tx_hashes": [
+      "0x09e3809197a29c1b3604befa9f5fae2e368eba0b9d4f5610bb1a9b990c7f8ee5"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x94b3c2422860316602de946512644ea407d34444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x206298741b6ed6b66a61",
+    "opened_at_block": 99801569,
+    "opened_at_unix_ns": 1779471292620062701,
+    "last_added_block": 99801569,
+    "buy_tx_hashes": [
+      "0xeb7e31bcc1f11db536a2d8c72c56d58211525cc0d43cc5c9a8bbb13c32990044"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "G",
+    "token_address": "0x091652ebc0a0238d7151a868f22d7cfd2a267777",
+    "token_symbol": "世界杯",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x42886063f9cdb8b1481",
+    "opened_at_block": 99756142,
+    "opened_at_unix_ns": 1779471292620062871,
+    "last_added_block": 99756142,
+    "buy_tx_hashes": [
+      "0x535db819126c02f2bcc972bf7924ef3a959387356ebba61ce1db0457df0e6433"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x5ea9176e9196c8968f9cc440cd148bcf07e74444",
+    "token_symbol": "Martian",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0xfc092a28a66a4075c698",
+    "opened_at_block": 99751298,
+    "opened_at_unix_ns": 1779471292620063041,
+    "last_added_block": 99751298,
+    "buy_tx_hashes": [
+      "0xb712c2593a8c9629a41bc7cfea1df6fecb43c0dc3754c04bdcd5e6d247788277"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x32a4bac74904e9d031c5d8e9262f69d30130c3cf",
+    "token_symbol": "MINIONS",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x398fb7782ce81d0b169b8",
+    "opened_at_block": 99813394,
+    "opened_at_unix_ns": 1779471362951845356,
+    "last_added_block": 99813394,
+    "buy_tx_hashes": [
+      "0xc7b08920111257ca16c05ef65c3e3cc7f0ea27a78077322d1750ba04838a887c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "O",
+    "token_address": "0x7b0e2e31a280054ba591b950e9f72048a1d14444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0x7c585087238000",
+    "tokens_held": "0x214d01247416e20000000",
+    "opened_at_block": 99735980,
+    "opened_at_unix_ns": 1779471292620042141,
+    "last_added_block": 99735980,
+    "buy_tx_hashes": [
+      "0xb03126293333d4ed0b3a4e007955be067be2640673da78e8b43fe77ff3380fba"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xcc5b155177cae9b702b3e54ee2dbb4ae041c4444",
+    "token_symbol": "Martians",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x36af9c7ec8132af5b6da1",
+    "opened_at_block": 99787699,
+    "opened_at_unix_ns": 1779471292620042571,
+    "last_added_block": 99787699,
+    "buy_tx_hashes": [
+      "0x3110791189a6b1fb9255854fdc0e113e342b00e50b71b68016b7f2a0ea72228b"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x8ed916bd7734a370a76b2da1aef3db38341e4444",
+    "token_symbol": "胖蛋",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x20faa2c3e7a49a0000000",
+    "opened_at_block": 99789520,
+    "opened_at_unix_ns": 1779471292620046811,
+    "last_added_block": 99789520,
+    "buy_tx_hashes": [
+      "0xea0c72eaad6008874e87250e81c95507d4b1f3bb022f3f30a70140c81c69b619"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xc7f7d23b54e18b46f9957d4630896fb07b3a4444",
+    "token_symbol": "币安人声",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x147663320848329aede67",
+    "opened_at_block": 99702336,
+    "opened_at_unix_ns": 1779471292620072290,
+    "last_added_block": 99702336,
+    "buy_tx_hashes": [
+      "0x94d8602eb1501e9b010c2c1a8900157af4d8b9de0ed230ca14d70e228c5b3943"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "G",
+    "token_address": "0x091652ebc0a0238d7151a868f22d7cfd2a267777",
+    "token_symbol": "世界杯",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x42886063f9cdb8b1481",
+    "opened_at_block": 99756142,
+    "opened_at_unix_ns": 1779471292620052481,
+    "last_added_block": 99756142,
+    "buy_tx_hashes": [
+      "0x535db819126c02f2bcc972bf7924ef3a959387356ebba61ce1db0457df0e6433"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x432e1b949dec1976d035e3b810330852cffb4444",
+    "token_symbol": "币安队长",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x107c50b8af30b7e7ac943",
+    "opened_at_block": 99742565,
+    "opened_at_unix_ns": 1779471292620043071,
+    "last_added_block": 99742565,
+    "buy_tx_hashes": [
+      "0x49cdbebc5201b6b9104a9576a7fda9bfd942dbc9a3879f6cb6245f2286eb2264"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xd540d5e502fc958f43606db30e22b125003d4444",
+    "token_symbol": "FWC",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0xc5b67da53fd99eb851eb",
+    "opened_at_block": 99799826,
+    "opened_at_unix_ns": 1779471292620052851,
+    "last_added_block": 99799826,
+    "buy_tx_hashes": [
+      "0x6fc162c94a8a52f87440abf17dd81e18de6f7aba76e5c2aa8f490f60cba9743a"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xe683a48df543d68ed96d53dd1fda73ccbd144444",
+    "token_symbol": "Fight",
+    "token_decimals": 18,
+    "bnb_in": "0xf195a3c4ba0000",
+    "tokens_held": "0x7d90c65118ee62097b9e",
+    "opened_at_block": 99716133,
+    "opened_at_unix_ns": 1779471292620063731,
+    "last_added_block": 99716133,
+    "buy_tx_hashes": [
+      "0x6007c2b9530837cc100cb02866e97d5f938498eeb18ada69eafd50369db16a64"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x30040d9fc9e57cb366df0ecac06a6f73c39b4444",
+    "token_symbol": "Distorted",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x14408ea87b1d3ffbc8bcd",
+    "opened_at_block": 99716440,
+    "opened_at_unix_ns": 1779471292620065271,
+    "last_added_block": 99716440,
+    "buy_tx_hashes": [
+      "0xd25a46454c78932415817798515d303b565de428c106044f2097b485180cfae2"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x0d12fd5f02dec8de7b996fefe0a66cb541ae4444",
+    "token_symbol": "正念之城",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x2ce8d402bf3e3a0000000",
+    "opened_at_block": 99751844,
+    "opened_at_unix_ns": 1779471292620046191,
+    "last_added_block": 99751844,
+    "buy_tx_hashes": [
+      "0x7d7e025394562faa495a67fc6a74da54b45427bd471845fd35a3d754a40e7ff1"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x5ea9176e9196c8968f9cc440cd148bcf07e74444",
+    "token_symbol": "Martian",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0xfc092a28a66a4075c698",
+    "opened_at_block": 99751298,
+    "opened_at_unix_ns": 1779471292620063211,
+    "last_added_block": 99751298,
+    "buy_tx_hashes": [
+      "0xb712c2593a8c9629a41bc7cfea1df6fecb43c0dc3754c04bdcd5e6d247788277"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "K",
+    "token_address": "0x590d543d9353dc75637a58b8c008fcecf5344444",
+    "token_symbol": "🔶 BNB",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0xca3c32f14b7daa10d6ad",
+    "opened_at_block": 99714390,
+    "opened_at_unix_ns": 1779471292620043481,
+    "last_added_block": 99714390,
+    "buy_tx_hashes": [
+      "0x5a47685b220f6e2c8464eddb4d58f5158ec964851870c8b33b03bee61052a947"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0x0352b5401c4d8bcb40bf17cc5e139935109a4444",
+    "token_symbol": "给阿嬷的情书",
+    "token_decimals": 18,
+    "bnb_in": "0x737693eb334000",
+    "tokens_held": "0x8c15a6ad17d109a7d173",
+    "opened_at_block": 99796318,
+    "opened_at_unix_ns": 1779471292620053021,
+    "last_added_block": 99796318,
+    "buy_tx_hashes": [
+      "0xa81227f28ffab5b6827ac10df5c5c18dad2f6674451ab8c3135d3c65eb3542ab"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "G",
+    "token_address": "0x94b3c2422860316602de946512644ea407d34444",
+    "token_symbol": "🔶BNB",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x1b5823e7d51179e77583",
+    "opened_at_block": 99737410,
+    "opened_at_unix_ns": 1779471292620047431,
+    "last_added_block": 99737410,
+    "buy_tx_hashes": [
+      "0x0a4a1e17dcc776306adc35ee4a87f03e6899a64659ca142b3eb0e1c11689903c"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x432e1b949dec1976d035e3b810330852cffb4444",
+    "token_symbol": "币安队长",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x107c50b8af30b7e7ac943",
+    "opened_at_block": 99742565,
+    "opened_at_unix_ns": 1779471292620053531,
+    "last_added_block": 99742565,
+    "buy_tx_hashes": [
+      "0x49cdbebc5201b6b9104a9576a7fda9bfd942dbc9a3879f6cb6245f2286eb2264"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x671ecbcb89ee3f85e2199294e723d309d98c4444",
+    "token_symbol": "哭哭马",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x356fe7272e74155e476",
+    "opened_at_block": 99797069,
+    "opened_at_unix_ns": 1779471292620053711,
+    "last_added_block": 99797069,
+    "buy_tx_hashes": [
+      "0xae1e57fa46442c745f393b2034aba2ff77461f7896b65c78eb0b5d3bc110bd91"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xaa2be3b13801c0c21138d6c0825731ff1d974444",
+    "token_symbol": "克拉奇",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x8de5d13eb4a8428d1fb1",
+    "opened_at_block": 99807914,
+    "opened_at_unix_ns": 1779471292620043311,
+    "last_added_block": 99807914,
+    "buy_tx_hashes": [
+      "0x64bc1ab1b32978c1910d9c9c189035b05a8329ddadd0a90f2f2e6f14a65f846b"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0x7bc284b12851d8cacf81d907c1bdda85b0794444",
+    "token_symbol": "正﻿念之城",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x39d2c5819a65d5c28f5c2",
+    "opened_at_block": 99751858,
+    "opened_at_unix_ns": 1779471292620064241,
+    "last_added_block": 99751858,
+    "buy_tx_hashes": [
+      "0x8c8cf55b07690a8494a4a25747770f7d7bd42c75a68e97dfc3f3fdcfbc6e5a07"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "O",
+    "token_address": "0x708559dfa8fcc534c953d63de933254a10c04444",
+    "token_symbol": "4GUY",
+    "token_decimals": 18,
+    "bnb_in": "0x7c585087238000",
+    "tokens_held": "0x22aed95b0724241e1c950",
+    "opened_at_block": 99776540,
+    "opened_at_unix_ns": 1779471292620063391,
+    "last_added_block": 99776540,
+    "buy_tx_hashes": [
+      "0x09e3809197a29c1b3604befa9f5fae2e368eba0b9d4f5610bb1a9b990c7f8ee5"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "FastTip",
+    "kol_name": "A",
+    "token_address": "0xcc5b155177cae9b702b3e54ee2dbb4ae041c4444",
+    "token_symbol": "Martians",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x36af9c7ec8132af5b6da1",
+    "opened_at_block": 99787699,
+    "opened_at_unix_ns": 1779471292620052111,
+    "last_added_block": 99787699,
+    "buy_tx_hashes": [
+      "0x3110791189a6b1fb9255854fdc0e113e342b00e50b71b68016b7f2a0ea72228b"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "M",
+    "token_address": "0x205f39c39f5fe15d4ef000aeb835de8deb264444",
+    "token_symbol": "14",
+    "token_decimals": 18,
+    "bnb_in": "0xb1a2bc2ec50000",
+    "tokens_held": "0x44c003b3a9522eae11a6",
+    "opened_at_block": 99748607,
+    "opened_at_unix_ns": 1779471292620061891,
+    "last_added_block": 99748607,
+    "buy_tx_hashes": [
+      "0xe03dd67044ad685234789392891b7be85b578500db6e4d99093e5e3654fa63a2"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  },
+  {
+    "portfolio": "NormalTip",
+    "kol_name": "A",
+    "token_address": "0xc7f7d23b54e18b46f9957d4630896fb07b3a4444",
+    "token_symbol": "币安人声",
+    "token_decimals": 18,
+    "bnb_in": "0x78cad1e25d0000",
+    "tokens_held": "0x147663320848329aede67",
+    "opened_at_block": 99702336,
+    "opened_at_unix_ns": 1779471292620041651,
+    "last_added_block": 99702336,
+    "buy_tx_hashes": [
+      "0x94d8602eb1501e9b010c2c1a8900157af4d8b9de0ed230ca14d70e228c5b3943"
+    ],
+    "d_mcap_usd": 0.0,
+    "our_entry_mcap_usd": 0.0
+  }
+]

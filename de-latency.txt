@@ -1,0 +1,33 @@
+# LATENCY MEASUREMENT  label=DE  utc=2026-05-22 09:27:53 UTC  samples=20
+# host=hetzner-eth  python=3.12.3
+
+  CATEGORY    LABEL                     HOST                              TCP_med  RPC_cold  RPC_warm  RPC_p95    ICMP         RESOLVED
+  -------------------------------------------------------------------------------------------------------------------------------------
+  (TCP_med = network RTT · RPC_cold = first eth_blockNumber incl. TLS · RPC_warm = keep-alive RPC ≈ what tx submission will see)
+  -------------------------------------------------------------------------------------------------------------------------------------
+  bsc_rpc     Binance dataseed #1       bsc-dataseed1.binance.org            24.2     105.1      26.7     31.7       —     54.220.46.36
+  bsc_rpc     Binance dataseed #2       bsc-dataseed2.binance.org            24.4     103.6      26.8     29.5       —     63.32.187.22
+  bsc_rpc     Binance dataseed #3       bsc-dataseed3.binance.org            24.4     102.9      26.1     46.8       —    63.33.100.204
+  bsc_rpc     Binance dataseed #4       bsc-dataseed4.binance.org            24.4     103.6      26.7     28.1       —     54.220.46.36
+  bsc_rpc     Defibit dataseed #1       bsc-dataseed1.defibit.io              5.1     104.9      27.0     27.2     5.1     99.83.204.86
+  bsc_rpc     Ninicoin dataseed #1      bsc-dataseed1.ninicoin.io             5.0      98.2      26.1     30.3     4.9    76.223.51.123
+  bsc_rpc     NodeReal (no-key)         bsc-mainnet.nodereal.io              24.4     101.8         —        —       —   52.213.147.119
+  bsc_rpc     NodeReal (auth)           bsc-mainnet.nodereal.io              24.4     341.5      26.7    263.2       —   52.213.147.119
+  bsc_rpc     PublicNode                bsc.publicnode.com                    5.6      27.5      13.1     17.3     5.5    104.20.24.117
+  bsc_rpc     Ankr                      rpc.ankr.com                          5.2      21.3       5.6      5.7       —     152.236.9.75
+  bsc_rpc     Blast API                 bsc-mainnet.public.blastapi.io        5.6     129.0     113.0    119.9     5.6    104.20.38.203
+  mev         BlockRazor BSC            bsc.blockrazor.xyz                    5.6      27.0      11.4     13.1     5.6      104.26.8.35
+  anchor      Cloudflare 1.1.1.1        1.1.1.1                               5.6         —         —        —     5.5          1.1.1.1
+  anchor      Google 8.8.8.8            8.8.8.8                               5.4         —         —        —     5.1          8.8.8.8
+  anchor      Vultr Singapore (anchor   139.180.128.6                      FAILED         —         —        —   176.0    139.180.128.6
+  anchor      Linode Singapore (anchor  172.104.32.79                      FAILED         —         —        —       —    172.104.32.79
+  anchor      AWS Singapore (anchor IP  18.140.0.1                         FAILED         —         —        —       —       18.140.0.1
+  anchor      AWS Singapore #2 (anchor  52.74.0.1                          FAILED         —         —        —       —        52.74.0.1
+
+  ── per-category median across all reachable endpoints ──
+    bsc_rpc     TCP_med=  24.2ms  RPC_warm_med=  26.7ms  n=11  (5/11 sub-10ms ⇒ CDN-edge)
+    mev         TCP_med=   5.6ms  RPC_warm_med=  11.4ms  n=1  (1/1 sub-10ms ⇒ CDN-edge)
+    anchor      TCP_med=   5.6ms  RPC_warm_med=  ─ ms  n=2  (2/2 sub-10ms ⇒ CDN-edge)
+
+# end of report — copy this file off the host for comparison.
+# RPC_warm is the latency budget your tx submission will spend per send.
