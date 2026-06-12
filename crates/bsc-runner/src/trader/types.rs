@@ -1,3 +1,4 @@
+#![allow(dead_code)]  // paper-trader code retained for re-enable; many helpers unused while live trader is active
 //! Shared trader types. Kept dependency-light so the strategy / executor /
 //! ledger / sim modules can all share without circular deps.
 //!
@@ -47,8 +48,11 @@ pub enum PortfolioMode {
 }
 
 impl PortfolioMode {
-    pub const ALL: &'static [PortfolioMode] =
-        &[PortfolioMode::FastTip, PortfolioMode::NormalTip];
+    /// Live set of portfolios that get a position per entry. Reduced to
+    /// [FastTip] only so per-KOL budget reservation is 1:1 with closes —
+    /// dual-portfolio (FastTip+NormalTip) would double-count the credit.
+    /// NormalTip variant kept for ledger backwards-compat on old rows.
+    pub const ALL: &'static [PortfolioMode] = &[PortfolioMode::FastTip];
 
     pub fn label(&self) -> &'static str {
         match self {
@@ -78,6 +82,12 @@ pub enum Decision {
         token: Address,
         kol_block: u64,
         kol_tx: B256,
+        /// KOL's wallet address (from `KolHit.from_addr`). Used by the
+        /// paper trader to query `balanceOf(kol_addr, token, kol_block-1)`
+        /// and `balanceOf(kol_addr, token, kol_block)` so it can compute
+        /// the KOL's actual sell fraction and close a PROPORTIONAL slice
+        /// of our position — not the entire bag.
+        kol_addr: Address,
     },
 }
 
@@ -113,6 +123,14 @@ pub struct OpenPosition {
     pub last_added_block: u64,
     /// Tx hashes of the buys that opened/added to this position.
     pub buy_tx_hashes: Vec<B256>,
+    /// Market cap (USD) D bought into — spot price × supply × BNB-USD at
+    /// entry. 0 if no V2 pool / price unavailable.
+    #[serde(default)]
+    pub d_mcap_usd: f64,
+    /// Market cap (USD) WE effectively entered at — our fill price ×
+    /// supply × BNB-USD. Gap vs `d_mcap_usd` = copy-lag cost.
+    #[serde(default)]
+    pub our_entry_mcap_usd: f64,
 }
 
 impl OpenPosition {
@@ -157,6 +175,31 @@ pub struct ClosedTrade {
     pub close_reason: CloseReason,
     /// The KOL's sell tx that triggered our exit (None for timeout / manual).
     pub trigger_sell_tx: Option<B256>,
+    /// Carried from the position: mcap (USD) D entered at.
+    #[serde(default)]
+    pub d_mcap_usd: f64,
+    /// Carried from the position: mcap (USD) we entered at.
+    #[serde(default)]
+    pub our_entry_mcap_usd: f64,
+    /// BNB-USD at close — for the readable `pnl_usd` CSV column.
+    #[serde(default)]
+    pub bnb_usd_at_close: f64,
+    /// Number of KOL sells we observed for this position. Live trader
+    /// fires on the FIRST sell so this is always 1; the recompute backfill
+    /// can rewrite it to the true multi-sell tranche count.
+    #[serde(default)]
+    pub kol_exit_count: u32,
+    /// Mcap (USD) at the KOL's first observed exit. Same as last for the
+    /// live trader; backfill overwrites with the true multi-sell sequence.
+    #[serde(default)]
+    pub kol_exit_mcap_first_usd: f64,
+    /// Mcap (USD) at the KOL's last observed exit (= first for live trader).
+    #[serde(default)]
+    pub kol_exit_mcap_last_usd: f64,
+    /// Token-weighted average mcap (USD) at our +1-block fills across all
+    /// exit tranches. Single value for live trader (one exit).
+    #[serde(default)]
+    pub our_avg_exit_mcap_usd: f64,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -170,6 +213,11 @@ pub enum CloseReason {
     /// Exit unquotable — both V2 and V3 returned zero or reverted.
     /// (Differentiated from ManualForce so it's filterable in PnL analysis.)
     NoLiquidity,
+    /// We could not VALUE the exit (bonding-curve native-BNB sell, no
+    /// readable price source on this pruned node). NOT a loss — booked
+    /// flat (PnL 0) and excluded from win-rate so the ledger isn't
+    /// poisoned by fabricated −100% rows.
+    PriceUnavailable,
 }
 
 impl CloseReason {
@@ -179,6 +227,7 @@ impl CloseReason {
             CloseReason::Timeout => "timeout",
             CloseReason::ManualForce => "manual_force",
             CloseReason::NoLiquidity => "no_liquidity",
+            CloseReason::PriceUnavailable => "price_unavailable",
         }
     }
 }
@@ -213,7 +262,10 @@ mod tests {
     fn portfolio_mode_labels() {
         assert_eq!(PortfolioMode::FastTip.label(), "fast_tip");
         assert_eq!(PortfolioMode::NormalTip.label(), "normal_tip");
-        assert_eq!(PortfolioMode::ALL.len(), 2);
+        // PortfolioMode::ALL was reduced to [FastTip] when per-KOL paper
+        // budget tracking landed (2026-05-25) — see types.rs::ALL comment.
+        // NormalTip variant kept for ledger backwards compat on old rows.
+        assert_eq!(PortfolioMode::ALL.len(), 1);
     }
 
     #[test]
@@ -238,6 +290,8 @@ mod tests {
             opened_at_unix_ns: 1,
             last_added_block: 1,
             buy_tx_hashes: vec![],
+            d_mcap_usd: 0.0,
+            our_entry_mcap_usd: 0.0,
         };
         let k = pos.key();
         assert_eq!(k.portfolio, PortfolioMode::FastTip);

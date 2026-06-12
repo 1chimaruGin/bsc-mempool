@@ -26,6 +26,9 @@ use bsc_dex::{V2Quoter, V3Quoter, addresses::WBNB};
 pub enum QuoteVenue {
     PancakeV2,
     PancakeV3,
+    /// No V2/V3 pool — token still on a Four.Meme bonding curve / flap.
+    /// Fill modelled at the KOL's own executed price (from his tx receipt).
+    Bonding,
 }
 
 impl QuoteVenue {
@@ -33,6 +36,7 @@ impl QuoteVenue {
         match self {
             QuoteVenue::PancakeV2 => "v2",
             QuoteVenue::PancakeV3 => "v3",
+            QuoteVenue::Bonding => "bonding",
         }
     }
 }

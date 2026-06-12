@@ -1,3 +1,4 @@
+#![allow(dead_code)]  // paper-trader code retained for re-enable; many helpers unused while live trader is active
 //! Position book — keeps track of every open paper position keyed by
 //! (portfolio, kol, token). Average-in semantics on adds: a second BUY of
 //! the same (portfolio, kol, token) tuple combines into the existing
@@ -66,8 +67,24 @@ impl PositionBook {
                         opened_at_unix_ns: now_ns,
                         last_added_block: block,
                         buy_tx_hashes: vec![tx],
+                        d_mcap_usd: 0.0,
+                        our_entry_mcap_usd: 0.0,
                     },
                 );
+            }
+        }
+    }
+
+    /// Stamp the entry market caps onto a position. First non-zero set
+    /// wins (matches `opened_at_*` "first buy" semantics; later average-in
+    /// buys don't rewrite the entry valuation).
+    pub fn set_entry_mcaps(&mut self, key: &PositionKey, d_mcap: f64, our_mcap: f64) {
+        if let Some(p) = self.by_key.get_mut(key) {
+            if p.d_mcap_usd == 0.0 {
+                p.d_mcap_usd = d_mcap;
+            }
+            if p.our_entry_mcap_usd == 0.0 {
+                p.our_entry_mcap_usd = our_mcap;
             }
         }
     }
@@ -78,6 +95,17 @@ impl PositionBook {
 
     pub fn remove(&mut self, key: &PositionKey) -> Option<OpenPosition> {
         self.by_key.remove(key)
+    }
+
+    /// Partial close: shrink an open position to the remaining tokens/cost
+    /// basis after a proportional sell. Used when the KOL only sold part
+    /// of their stake — we close the same fraction of ours and keep the
+    /// rest open. No-op if the key doesn't exist.
+    pub fn shrink(&mut self, key: &PositionKey, new_tokens_held: U256, new_bnb_in: U256) {
+        if let Some(p) = self.by_key.get_mut(key) {
+            p.tokens_held = new_tokens_held;
+            p.bnb_in = new_bnb_in;
+        }
     }
 
     /// All positions across all portfolios opened on or before `cutoff_unix_ns`
@@ -220,7 +248,10 @@ mod tests {
             );
         }
         let keys = book.keys_for_kol_token("D", t);
-        assert_eq!(keys.len(), 2);
+        // Was 2 when PortfolioMode::ALL = [FastTip, NormalTip]; now ALL is
+        // [FastTip] only (2026-05-25 per-KOL budget rework). Test asserts
+        // the iteration matches whatever the const exposes.
+        assert_eq!(keys.len(), PortfolioMode::ALL.len());
     }
 
     #[test]

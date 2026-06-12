@@ -1,3 +1,4 @@
+#![allow(dead_code)]  // paper-trader code retained for re-enable; many helpers unused while live trader is active
 //! Persistence for the paper trader.
 //!
 //! - `closed_trades.csv` — append-only, one row per closed trade.
@@ -15,8 +16,10 @@ use std::path::{Path, PathBuf};
 use tokio::sync::Mutex;
 
 const CSV_HEADER: &str = "ts_unix_ns,portfolio,kol_name,token_address,token_symbol,\
-bnb_in_wei,bnb_out_wei,pnl_wei,pnl_pct,opened_at_block,closed_at_block,\
-held_secs,buy_tx_count,close_reason,trigger_sell_tx\n";
+bnb_in_wei,bnb_out_wei,pnl_wei,pnl_bnb,pnl_usd,pnl_pct,d_mcap_usd,our_entry_mcap_usd,\
+bnb_usd_close,opened_at_block,closed_at_block,\
+held_secs,buy_tx_count,close_reason,trigger_sell_tx,\
+kol_exit_count,kol_exit_mcap_first_usd,kol_exit_mcap_last_usd,our_avg_exit_mcap_usd\n";
 
 pub struct Ledger {
     csv_path: PathBuf,
@@ -122,9 +125,13 @@ fn format_csv_row(t: &ClosedTrade) -> String {
         .trigger_sell_tx
         .map(|h| format!("{h:#x}"))
         .unwrap_or_default();
+    let pnl_bnb = t.pnl_wei as f64 / 1e18;
+    let pnl_usd = pnl_bnb * t.bnb_usd_at_close;
     format!(
-        "{ts},{portfolio},{kol},{addr:#x},{sym},{bnb_in},{bnb_out},{pnl_wei},{pnl_pct:.6},\
-         {open_block},{close_block},{held},{buys},{reason},{trigger}\n",
+        "{ts},{portfolio},{kol},{addr:#x},{sym},{bnb_in},{bnb_out},{pnl_wei},\
+         {pnl_bnb:.6},{pnl_usd:.2},{pnl_pct:.6},{d_mcap:.0},{our_mcap:.0},\
+         {bnb_usd:.2},{open_block},{close_block},{held},{buys},{reason},{trigger},\
+         {kxc},{kxmf:.0},{kxml:.0},{oaxm:.0}\n",
         ts = t.opened_at_unix_ns,
         portfolio = t.portfolio.label(),
         kol = csv_escape(&t.kol_name),
@@ -133,13 +140,22 @@ fn format_csv_row(t: &ClosedTrade) -> String {
         bnb_in = t.bnb_in_wei,
         bnb_out = t.bnb_out_wei,
         pnl_wei = t.pnl_wei,
+        pnl_bnb = pnl_bnb,
+        pnl_usd = pnl_usd,
         pnl_pct = t.pnl_pct,
+        d_mcap = t.d_mcap_usd,
+        our_mcap = t.our_entry_mcap_usd,
+        bnb_usd = t.bnb_usd_at_close,
         open_block = t.opened_at_block,
         close_block = t.closed_at_block,
         held = t.held_secs,
         buys = t.buy_tx_count,
         reason = t.close_reason.label(),
         trigger = trigger,
+        kxc = t.kol_exit_count,
+        kxmf = t.kol_exit_mcap_first_usd,
+        kxml = t.kol_exit_mcap_last_usd,
+        oaxm = t.our_avg_exit_mcap_usd,
     )
 }
 
@@ -183,6 +199,13 @@ mod tests {
             buy_tx_count: 1,
             close_reason: CloseReason::KolSell,
             trigger_sell_tx: None,
+            d_mcap_usd: 12_345.0,
+            our_entry_mcap_usd: 13_000.0,
+            bnb_usd_at_close: 650.0,
+            kol_exit_count: 1,
+            kol_exit_mcap_first_usd: 21_000.0,
+            kol_exit_mcap_last_usd: 21_000.0,
+            our_avg_exit_mcap_usd: 20_500.0,
         };
         let row = format_csv_row(&t);
         assert!(row.contains("normal_tip"));
@@ -219,6 +242,13 @@ mod tests {
             buy_tx_count: 1,
             close_reason: CloseReason::NoLiquidity,
             trigger_sell_tx: None,
+            d_mcap_usd: 0.0,
+            our_entry_mcap_usd: 0.0,
+            bnb_usd_at_close: 600.0,
+            kol_exit_count: 0,
+            kol_exit_mcap_first_usd: 0.0,
+            kol_exit_mcap_last_usd: 0.0,
+            our_avg_exit_mcap_usd: 0.0,
         };
         let row = format_csv_row(&t);
         assert!(row.contains("no_liquidity"));

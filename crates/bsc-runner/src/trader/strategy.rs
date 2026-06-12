@@ -29,11 +29,16 @@ use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub struct StrategyConfig {
-    /// Minimum BUY size in wei to trigger entry. Below this we skip (spam
-    /// filter). Default 0.5 BNB ≈ $300 — much lower than ETH's threshold
-    /// since BSC gas is ~$0.20 per swap (vs ETH's $5-50), making smaller
-    /// trades viable.
-    pub min_buy_bnb_wei: U256,
+    /// Only act on these KOL names (matches `KolHit.kol_name`). Empty = all.
+    /// User scope: just `["D"]`.
+    pub kol_filter: Vec<String>,
+    /// Minimum BUY size in **USD** to trigger entry. Computed as
+    /// `value_bnb * bnb_usd`. Set to 0.0 to disable (BNB gate only).
+    pub min_buy_usd: f64,
+    /// Minimum BUY size in **BNB** to trigger entry. Set to 0.0 to disable
+    /// (USD gate only). Use this when you want a price-stable size floor
+    /// (KOLs trade in BNB, so BNB-denominated rules don't drift).
+    pub min_buy_bnb: f64,
     /// Bot trade size as a fraction of KOL's input. 0.05 = 5%.
     pub size_fraction: f64,
 }
@@ -41,8 +46,9 @@ pub struct StrategyConfig {
 impl Default for StrategyConfig {
     fn default() -> Self {
         Self {
-            // 0.5 BNB ≈ $300 at $600/BNB. Re-tune after first week of data.
-            min_buy_bnb_wei: U256::from(500_000_000_000_000_000u128),
+            kol_filter: vec!["D".to_string()],
+            min_buy_usd: 400.0,
+            min_buy_bnb: 0.0,
             size_fraction: 0.05,
         }
     }
@@ -57,15 +63,20 @@ impl Strategy {
         Self { cfg }
     }
 
-    pub fn evaluate(&self, hit: &KolHit) -> Decision {
-        // Method must be a known swap selector. Anything else (approve,
-        // transfer, unknown) is skipped.
-        let is_swap = matches!(
-            hit.method_label,
-            Some(m) if m.contains("swap") || m.contains("Swap") || m.contains("Pancake")
-        );
-        if !is_swap {
-            return Decision::Skip { reason: SkipReason::NotASwap };
+    /// Decide on a KOL hit. `bnb_usd` is the live BNB/USD price for the
+    /// USD-denominated entry gate (fetched + cached by the consumer).
+    ///
+    /// Uses the GMGN-decoded `hit.side` / `hit.token` directly — no
+    /// calldata re-decode. Produces:
+    ///   - `Enter` on a filtered KOL's BUY ≥ `min_buy_usd`
+    ///   - `Exit`  on a filtered KOL's SELL of any token (the executor
+    ///     closes only if we actually hold it)
+    pub fn evaluate(&self, hit: &KolHit, bnb_usd: f64) -> Decision {
+        // KOL scope filter.
+        if !self.cfg.kol_filter.is_empty()
+            && !self.cfg.kol_filter.iter().any(|k| k == &hit.kol_name)
+        {
+            return Decision::Skip { reason: SkipReason::NotKolHit };
         }
 
         let tx_hash = match B256::from_str(&hit.tx_hash) {
@@ -73,33 +84,61 @@ impl Strategy {
             Err(_) => return Decision::Skip { reason: SkipReason::UnknownToken },
         };
 
-        // value_bnb > 0 strongly indicates a BUY (KOL spent BNB for tokens).
-        // value_bnb == 0 with a swap method means token-for-token or
-        // token-for-BNB; we currently can't tell which without receipt
-        // decoding, so we skip those and rely on the 24h timeout for exits.
-        if hit.value_bnb <= 0.0 {
-            return Decision::Skip { reason: SkipReason::UnsupportedSide };
-        }
+        // Need a GMGN-decoded token + side. Non-swap (approve/transfer) or
+        // unrecognised router → no token/side → skip.
+        let Some(token) = hit.token else {
+            return Decision::Skip { reason: SkipReason::NotASwap };
+        };
 
-        let kol_bnb = U256::from((hit.value_bnb * 1e18) as u128);
-        if kol_bnb < self.cfg.min_buy_bnb_wei {
-            return Decision::Skip { reason: SkipReason::BelowBuyThreshold };
-        }
-
-        // Pull target token out of the calldata via path[last].
-        // The KolHit doesn't carry calldata directly — it has method_id only.
-        // The caller (the trader's bus consumer) needs to fetch the tx body
-        // for token extraction. For the Decision shape we leave token=ZERO
-        // and let the executor resolve it; that matches the ETH stack's
-        // contract.
-        let our_bnb = scale_size(kol_bnb, self.cfg.size_fraction);
-        Decision::Enter {
-            kol_name: hit.kol_name.clone(),
-            token: Address::ZERO, // executor decodes calldata to fill
-            bnb_amount: our_bnb,
-            kol_bnb_input: kol_bnb,
-            kol_block: 0, // mempool mode — executor fills from current head
-            kol_tx: tx_hash,
+        match hit.side {
+            Some("SELL") => {
+                // Exit signal: the executor closes iff we hold this token.
+                // `kol_block` is populated from the confirmed-block field
+                // when this hit comes from kol_confirm — the paper trader
+                // needs it to query balanceOf at sell_block-1 vs sell_block
+                // to compute the KOL's actual sell fraction (proportional
+                // exits, not all-or-nothing).
+                let kol_addr = Address::from_str(&hit.from_addr).unwrap_or(Address::ZERO);
+                Decision::Exit {
+                    kol_name: hit.kol_name.clone(),
+                    token,
+                    kol_block: hit.confirmed_block.unwrap_or(0),
+                    kol_tx: tx_hash,
+                    kol_addr,
+                }
+            }
+            Some("BUY") => {
+                if hit.value_bnb <= 0.0 {
+                    return Decision::Skip { reason: SkipReason::UnsupportedSide };
+                }
+                // Two-gate check; either can be disabled by setting to 0.
+                if self.cfg.min_buy_bnb > 0.0 && hit.value_bnb < self.cfg.min_buy_bnb {
+                    return Decision::Skip {
+                        reason: SkipReason::BelowBuyThreshold,
+                    };
+                }
+                if self.cfg.min_buy_usd > 0.0 {
+                    let usd = hit.value_bnb * bnb_usd;
+                    if usd < self.cfg.min_buy_usd {
+                        return Decision::Skip {
+                            reason: SkipReason::BelowBuyThreshold,
+                        };
+                    }
+                }
+                let kol_bnb = U256::from((hit.value_bnb * 1e18) as u128);
+                let our_bnb = scale_size(kol_bnb, self.cfg.size_fraction);
+                Decision::Enter {
+                    kol_name: hit.kol_name.clone(),
+                    token,
+                    bnb_amount: our_bnb,
+                    kol_bnb_input: kol_bnb,
+                    kol_block: 0, // mempool mode — executor fills from head
+                    kol_tx: tx_hash,
+                }
+            }
+            _ => Decision::Skip {
+                reason: SkipReason::UnsupportedSide,
+            },
         }
     }
 }
@@ -191,40 +230,53 @@ mod tests {
     use crate::kol_watch::KolHit;
     use alloy::primitives::Address;
 
-    fn hit_buy_with_value_bnb(bnb: f64) -> KolHit {
+    // GMGN-decoded hit (the real shape now): side + token populated.
+    fn gmgn_hit(name: &str, bnb: f64, side: Option<&'static str>) -> KolHit {
+        let tok: Address = "0x1234567890aBcdEF1234567890aBcdef12345678"
+            .parse()
+            .unwrap();
         KolHit {
-            kol_name: "D".into(),
+            kol_name: name.into(),
             kol_emoji: None,
-            kol_groups: vec!["GMGN".into()],
+            kol_groups: vec!["GOAT".into()],
             tx_hash: format!("{:#x}", B256::ZERO),
             from_addr: format!("{:#x}", Address::ZERO),
             to_addr: None,
-            to_label: None,
-            method_id: "0x7ff36ab5".into(),
-            method_label: Some("PancakeV2 swapExactBNBForTokens"),
+            to_label: Some("GMGN proxy"),
+            method_id: "0x4d819a2a".into(),
+            method_label: Some("GMGN router (flap/Four.Meme)"),
             value_bnb: bnb,
             gas_price_gwei: 1.0,
-            gas_limit: 250_000,
+            gas_limit: 600_000,
             nonce: 1,
             source_seen: "(local_ipc,1)".into(),
             calldata: Vec::new(),
             decoded: None,
+            token: side.map(|_| tok),
+            side,
+            confirmed_block: None,
+            visibility: "public",
         }
     }
 
+    // BNB ≈ $600 in these tests; min_buy_usd default = 400.
+    const BNB_USD: f64 = 600.0;
+
     #[test]
-    fn rejects_below_threshold() {
+    fn rejects_below_usd_threshold() {
         let strat = Strategy::new(StrategyConfig::default());
+        // 0.1 BNB * $600 = $60 < $400
         assert!(matches!(
-            strat.evaluate(&hit_buy_with_value_bnb(0.1)),
+            strat.evaluate(&gmgn_hit("D", 0.1, Some("BUY")), BNB_USD),
             Decision::Skip { reason: SkipReason::BelowBuyThreshold }
         ));
     }
 
     #[test]
-    fn accepts_above_threshold() {
+    fn accepts_above_usd_threshold() {
         let strat = Strategy::new(StrategyConfig::default());
-        match strat.evaluate(&hit_buy_with_value_bnb(1.0)) {
+        // 1.0 BNB * $600 = $600 ≥ $400
+        match strat.evaluate(&gmgn_hit("D", 1.0, Some("BUY")), BNB_USD) {
             Decision::Enter {
                 bnb_amount,
                 kol_bnb_input,
@@ -238,24 +290,40 @@ mod tests {
     }
 
     #[test]
-    fn skips_non_swap() {
-        let strat = Strategy::new(StrategyConfig::default());
-        let mut h = hit_buy_with_value_bnb(1.0);
-        h.method_label = Some("BEP20 approve");
+    fn other_kol_filtered_out() {
+        let strat = Strategy::new(StrategyConfig::default()); // filter = ["D"]
         assert!(matches!(
-            strat.evaluate(&h),
+            strat.evaluate(&gmgn_hit("A", 5.0, Some("BUY")), BNB_USD),
+            Decision::Skip { reason: SkipReason::NotKolHit }
+        ));
+    }
+
+    #[test]
+    fn non_swap_skipped() {
+        let strat = Strategy::new(StrategyConfig::default());
+        // approve/transfer → gmgn decode gave no token/side
+        assert!(matches!(
+            strat.evaluate(&gmgn_hit("D", 1.0, None), BNB_USD),
             Decision::Skip { reason: SkipReason::NotASwap }
         ));
     }
 
     #[test]
-    fn skips_zero_value() {
-        // Day-3 BSC scope: only value>0 buys are actionable from mempool data.
+    fn sell_emits_exit() {
         let strat = Strategy::new(StrategyConfig::default());
-        let h = hit_buy_with_value_bnb(0.0);
+        match strat.evaluate(&gmgn_hit("D", 0.0, Some("SELL")), BNB_USD) {
+            Decision::Exit { kol_name, .. } => assert_eq!(kol_name, "D"),
+            other => panic!("expected Exit, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn buy_blocked_when_price_unavailable() {
+        // Fail-closed: bnb_usd=0 → any BUY is below the USD gate.
+        let strat = Strategy::new(StrategyConfig::default());
         assert!(matches!(
-            strat.evaluate(&h),
-            Decision::Skip { reason: SkipReason::UnsupportedSide }
+            strat.evaluate(&gmgn_hit("D", 100.0, Some("BUY")), 0.0),
+            Decision::Skip { reason: SkipReason::BelowBuyThreshold }
         ));
     }
 
