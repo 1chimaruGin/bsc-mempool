@@ -3,6 +3,9 @@
 **/*.rs.bk
 /Cargo.lock.bak
 
+# logs
+logs/*
+
 # secrets
 .env
 .env.local
