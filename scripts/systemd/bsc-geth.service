@@ -11,7 +11,11 @@ WorkingDirectory=/data/bsc-meme-mev/bsc-geth
 ExecStart=/usr/local/bin/bsc-geth \
     --config /data/bsc-meme-mev/bsc-geth/conf/config.toml \
     --datadir /data/bsc-meme-mev/bsc-geth/data \
-    --syncmode snap \
+    --syncmode full \
+    --pruneancient=true \
+    --tries-verify-mode none \
+    --history.transactions 0 \
+    --history.logs 576000 \
     --cache 16384 \
     --maxpeers 80 \
     --http \
@@ -27,15 +31,27 @@ ExecStart=/usr/local/bin/bsc-geth \
     --metrics.addr 127.0.0.1 \
     --metrics.port 6060
 
-# Tuning notes:
-#  --cache 16384 → 16 GB cache. Box has 125 GB RAM total; plenty for OS +
-#                  future bsc-runner. Speeds up snap sync state replay.
-#  --maxpeers 80 → was 50; more peers = more state shards in parallel
-#                  during snap sync. BSC has plenty of peers post-Fermi.
-#  --state.scheme intentionally NOT set on CLI — let it inherit from
-#                  whatever `bsc-geth init` wrote (default is PBSS on v1.7.3).
-#  --diffsync REMOVED — legacy / pre-PBSS optimization; PBSS supersedes.
-#  --tries-verify-mode REMOVED — default behavior is correct for snap sync.
+# Tuning notes (all per BSC docs § Node Maintenance, recommended pruneancient cmd):
+#  --syncmode full + --pruneancient=true → REQUIRED when starting from the
+#                  bnb-chain pruneancient PBSS snapshot. Snap-sync would
+#                  attempt to re-download state from peers (overwriting the
+#                  snapshot); full sync just replays new blocks forward.
+#                  --pruneancient tells geth the freezer is intentionally
+#                  pruned (without it: "ancient chain segments already
+#                  extracted" fatal at startup).
+#                  ONE-WAY: once on, ancient stays pruned; can't go back.
+#  --tries-verify-mode none → "fastnode" mode; trusts snapshot state without
+#                  re-verifying every trie root on import. Major speedup for
+#                  the 5-week catch-up. Safe for RPC/mempool nodes; do NOT
+#                  use on a validator. ONE-WAY: trie verification data lost.
+#  --history.transactions 0 → don't index historical tx for getTxByHash.
+#                  Saves CPU/disk during catch-up; the mempool watcher only
+#                  reads pending txs anyway. Reversible.
+#  --history.logs 576000 → keep ~3 days of log history (default v1.7.3, set
+#                  explicitly to match docs).
+#  --cache 16384 → 16 GB cache. 125 GB RAM box; plenty for OS + bsc-runner.
+#  --maxpeers 80 → more peers = faster block fetch.
+#  --state.scheme intentionally NOT set on CLI — snapshot's PBSS preserved.
 
 Restart=on-failure
 RestartSec=10

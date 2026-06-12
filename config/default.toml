@@ -10,7 +10,7 @@ native_decimals = 18
 
 [metrics]
 # Localhost only; SSH-tunnel for remote dashboards.
-listen_addr = "127.0.0.1:9101"   # +1 vs ETH stack so they can coexist for a transition window
+listen_addr = "127.0.0.1:9102"   # 9100=ETH stack, 9101=node_exporter, 6060=bsc-geth; 9102 free
 
 [capture]
 enabled = false
@@ -49,22 +49,35 @@ enabled = true
 file = "config/kols.toml"
 groups = []
 
-# Buy-size floor BEFORE we paper-trade a KOL hit. BSC swaps are cheap;
-# threshold can be lower than ETH's 0.15 ETH ($350). Default: 0.5 BNB ≈ $300.
+# PUBLIC-mempool paper trader — closed-loop per-KOL budgets ($200/KOL).
+# Driven by kol_watch (pending mempool hits). Sized at 10% of per-KOL
+# current cash; compounds wins, shrinks losses. KOLs are independent.
 [trader]
 enabled = true
 mode = "paper"
-min_buy_bnb_wei = "500000000000000000"   # 0.5 BNB
-size_fraction = 0.05
+min_buy_bnb_wei = "500000000000000000"   # legacy/unused (BNB gate below supersedes)
+kol_filter = []                          # [] = ALL 15 GOAT KOLs (per-KOL portfolios)
+min_buy_usd = 50.0                       # noise floor — filters dust/test BUYs; budget gate sizes the rest
+size_fraction = 0.01                     # legacy/unused when per_kol_budget > 0
 rpc_url = "http://127.0.0.1:8545"
 ledger_dir = "/data/bsc-meme-mev/trader"
 hold_timeout_secs = 86400
 sweep_interval_secs = 300
 daily_summary_utc_hour = 0
+# Per-KOL closed-loop budget (2026-05-25 retest): $200/KOL @ ~$665/BNB ≈ 0.3 BNB.
+per_kol_budget_bnb_wei = "300000000000000000"
+position_pct_bps        = 1000                  # 10% of current cash per trade
+dust_floor_wei          = "1000000000000000"    # 0.001 BNB (~$0.66) — KOL retires below this
+# Realism haircuts — paper PnL = upper bound without these.
+# Public-pending path lands +1 block AFTER D's tx, so always fills on the
+# adversely-moved pool. Bonding curves move more per trade than V2 pools.
+slippage_bps_v2 = 150         # 1.5% per leg (entry + exit)
+slippage_bps_bonding = 500    # 5.0% per leg
+gas_per_trade_usd = 0.30      # × 2 per round-trip
 
 [trader.telegram]
-enabled = true
-chat_id = -1003366848833                # same chat as ETH stack
+enabled = false                           # silenced — 15 KOLs × 2 visibilities would spam
+chat_id = -1003366848833
 # bot_token from env: BSC_MEME_MEV_TRADER__TELEGRAM__BOT_TOKEN
 
 [trader.dex]
@@ -81,9 +94,55 @@ v3_fee_tiers = [10000, 2500, 500, 100]
 # V2 is dominant on BSC — quote it first; fall back to V3 only if V2 has no pair.
 prefer_v2 = true
 
-[liquidator]
-# Venus protocol observer (Day 4 of roadmap). Disabled until then.
+# ── SEPARATE private-confirmed copy strategy ───────────────────────────────
+# Independent paper trader driven by kol_confirm (NOT the pending mempool):
+# enters on D's PRIVATE confirmed buys (invisible pre-block, ~85ms post),
+# exit-follows D's confirmed sells. Own ledger dir → public vs private PnL
+# compare cleanly. Same D/$400 scope.
+[trader_private]
+enabled = true
+mode = "paper"
+min_buy_bnb_wei = "500000000000000000"
+kol_filter = []                          # [] = ALL 15 GOAT KOLs
+min_buy_usd = 50.0                       # noise floor — filters dust/test BUYs
+size_fraction = 0.01                     # legacy/unused when per_kol_budget > 0
+rpc_url = "http://127.0.0.1:8545"
+ledger_dir = "/data/bsc-meme-mev/trader_private"
+hold_timeout_secs = 86400
+sweep_interval_secs = 300
+daily_summary_utc_hour = 0
+# Per-KOL closed-loop budget — independent pot from [trader]. Same KOLs,
+# different visibility channel.
+per_kol_budget_bnb_wei = "300000000000000000"
+position_pct_bps        = 1000
+dust_floor_wei          = "1000000000000000"
+# Private-confirmed path also lands +1 block after D, but D's confirmed tx
+# already includes its full impact — the curve point is fixed by the time
+# we re-execute, so haircut here represents same-block-ordering uncertainty
+# (other re-execs racing us). Conservative but slightly tighter than public.
+slippage_bps_v2 = 100         # 1.0% per leg
+slippage_bps_bonding = 400    # 4.0% per leg
+gas_per_trade_usd = 0.30      # × 2 per round-trip
+
+[trader_private.telegram]
 enabled = false
+chat_id = -1003366848833
+# bot_token from env: BSC_MEME_MEV_TRADER_PRIVATE__TELEGRAM__BOT_TOKEN
+
+[trader_private.dex]
+v2_factory = "0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73"
+v2_router = "0x10ED43C718714eb63d5aA57B78B54704E256024E"
+v3_factory = "0x0BFbCF9fa4f9C56B0F40a671Ad40E0805A091865"
+v3_router = "0x13f4EA83D0bd40E75C8222255bc855a974568Dd4"
+v3_quoter_v2 = "0xB048Bbc1Ee6b733FFfCFb9e9CeF7375518e25997"
+multicall3 = "0xcA11bde05977b3631167028862bE2a173976CA11"
+wbnb = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c"
+v3_fee_tiers = [10000, 2500, 500, 100]
+prefer_v2 = true
+
+[liquidator]
+# Venus liquidation health watcher (Phase 1, READ-ONLY — no funds, no tx).
+enabled = true
 protocol = "venus"
 rpc_url = "http://127.0.0.1:8545"
 ledger_dir = "/data/bsc-meme-mev/liquidator"
@@ -106,3 +165,60 @@ chat_id = -1003366848833
 # Day 5 of roadmap — disabled until then.
 enabled = false
 launchpad = "0x5c952063c7fc8610FFDB798152D69F0B9550762b"   # verify on launch
+
+# Dev launchpad sniper — buys new Four.Meme tokens when the creator is on
+# the trusted-dev whitelist. Independent from the KOL copy-trader.
+# See crates/bsc-runner/src/dev_sniper.rs.
+# Adaptive trailing-stop exit strategy. When enabled, REPLACES KOL-driven
+# exits — D's sell signals are ignored. Positions exit purely on price
+# action: hard SL at -30%, trail at -10% from peak once armed (+20% gain),
+# timeout at 4000 blocks (~30 min). See trader/adaptive_trail.rs.
+[adaptive_trail]
+enabled         = true                                     # ENABLE the trail
+# 2026-06-04: tuned to arm+30/trail-30/SL-30 — best-in-sweep across a
+# 30-day, 578-trade path-based backtest of D's actual BSC trades.
+# 2026-06-07: added BREAK-EVEN RATCHET to protect the small-pump-dump
+# pattern (4 of 4 closed losses yesterday peaked +13..+27% then rode
+# to -30% SL). Cf. scripts/analyze-salvage-strategies.py.
+arm_pct             = 0.30                                 # arm trail at +30% gain
+trail_pct           = 0.30                                 # exit at -30% from peak
+hard_sl_pct         = 0.30                                 # exit at -30% from entry
+max_hold_blocks     = 4000                                 # 30 min timeout
+breakeven_at_pct    = 0.15                                 # once peak ≥ entry × 1.15…
+breakeven_lock_pct  = 0.05                                 # …lock SL at entry × 1.05 (+5%)
+ws_url              = "ws://127.0.0.1:8546"                # local geth WS
+rpc_url             = "http://127.0.0.1:8545"              # local geth HTTP
+
+[dev_sniper]
+enabled = true                                             # 2026-06-01 paper-mode test (2 devs)
+mode = "paper"                                             # SAFE — logs only, no broadcasts
+trade_size_usd = 10.0                                      # ignored when trade_size_bnb_wei is set
+# Backtest-locked snipe size: 0.0271 BNB ≈ $18 @ $670/BNB.
+# Pinned in BNB (not USD) so the size doesn't drift with BNB/USD swings.
+# 225 trades / 26.2% WR / +$3.09/trade / +$23.97/day backtest.
+trade_size_bnb_wei = "27100000000000000"                   # 0.0271 BNB
+dev_whitelist_file = "config/dev_whitelist_sniper.toml"    # 2 devs (separate from KOL trader's list)
+ws_url = "ws://127.0.0.1:8546"                             # local geth WS
+rpc_url = "http://127.0.0.1:8545"                          # local geth HTTP (trail price queries)
+# Legacy single-point TP/SL — IGNORED when sniper_trail.enabled=true.
+# Kept for back-compat / fallback when trail is off.
+profit_take_pct = 50.0
+stop_loss_pct = 30.0
+timeout_secs = 1800
+eval_interval_secs = 30
+
+# Adaptive trail dedicated to dev_sniper — separate tuning from the KOL
+# trader's [adaptive_trail]. Backtest-validated parameters (beats
+# Kelly default arm+20/trail-10 by +80%):
+#   ARM at +10%  → trail at -30% from peak  → hard SL at -30% from entry
+#   TIMEOUT at 4000 blocks (~30 min)
+# Looser arm captures more launches that only mini-pump; wider trail
+# lets winners ride further before snap-back.
+[sniper_trail]
+enabled         = true
+arm_pct         = 0.10                                     # +10% to arm (vs KOL +20%)
+trail_pct       = 0.30                                     # -30% from peak (vs KOL -10%)
+hard_sl_pct     = 0.30                                     # -30% from entry (same)
+max_hold_blocks = 4000                                     # 30 min
+ws_url          = "ws://127.0.0.1:8546"
+rpc_url         = "http://127.0.0.1:8545"

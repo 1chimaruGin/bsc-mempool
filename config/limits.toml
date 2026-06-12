@@ -1,0 +1,75 @@
+# Live-trading kill criteria. EVERY trade is checked against these.
+# Failing any single field = trade is skipped + logged + Telegram alert.
+# Hitting daily_loss_usd = FULL HALT (manual restart needed).
+#
+# These values are read at runner startup. Edit + restart to apply.
+# Audit-trail is preserved in journalctl.
+
+# === Phase progression (set ONE to true) ===
+[phase]
+# Shadow: sign every tx LOCALLY, write to log, NEVER broadcast. ~0 risk.
+# 2026-06-01: LOCKED to shadow=true after user stopped live trading.
+# Any future restart will load this config and stay in shadow until
+# explicitly flipped back to full=true. Belt-and-suspenders safety —
+# even an accidental `systemctl start bsc-runner` won't spend money.
+# 2026-06-04: LIVE again. New SignalDump leading-exit rule shipped
+# (dist_from_local_max>0.30 AND vel_10<-0.01 — see adaptive_trail.rs
+# step()). Backtested over 584 D trades, 30 days:
+#   trail-only (current):  1.126x avg, 239 wins, 44 ≥2x
+#   trail + SignalDump:    1.174x avg, 202 wins, 64 ≥2x  ← THIS
+#   gross +4.3% per trade; ~+$10/day net at $10 size, 19 trades/day.
+shadow      = false
+# Tiny: real broadcast but trade size capped at 0.001 BNB (~$0.66).
+tiny        = false
+# Full: trade size up to per_trade_max_bnb. Production sizing.
+full        = true
+
+# === Hard limits ===
+[limits]
+daily_loss_usd        = 25.0     # 2026-06-09: 40 → 25 (reverted with $10 size)
+per_trade_max_bnb     = 0.025    # 2026-06-09: 0.040 → 0.025 (~$15 ceiling) with $10 size
+min_wallet_bnb        = 0.01     # 2026-06-03: 0.079 → 0.01 (~$6.7) to unstick D-following at lower bankroll
+max_open_positions    = 10       # concurrent
+max_trades_per_day    = 60       # raised from 30: D+I together hit ~30/day in paper
+max_gas_price_gwei    = 10       # walk away rather than overpay
+slippage_bps          = 500      # 5% max slippage tolerance
+cooldown_after_loss_ms = 5000    # 5s pause after a -$3+ loss
+
+# === Strategy ===
+[strategy]
+mode                  = "copy_at_n_plus_1"
+public_only           = true                # 2026-05-30: ROLLED BACK to PUBLIC-only after -$84 loss; live diverged ~$266 from paper (+$182)
+size_fraction         = 0.01                # legacy/unused when trade_size_usd > 0
+kol_whitelist         = ["D"]               # D only — I dropped 2026-05-29 after paper showed losses
+# Entry gates — set either or both. 0.0 disables a gate.
+min_buy_bnb           = 0.1                 # KOL must spend ≥ 0.1 BNB on the BUY (~$66)
+min_buy_usd           = 0.0                 # disabled — BNB gate is the floor
+
+# Trade sizing — USD denominated, computed at trade time from BNB/USD oracle.
+trade_size_usd          = 10.0              # PUBLIC: $10 per trade (2026-06-09: 20 → 10 to reduce per-trade risk while race-submit data is collected)
+trade_size_private_usd  = 0.0               # PRIVATE: DISABLED (rolled back 2026-05-30)
+dev_bonus_size_usd      = 0.0               # disabled (dev resolver removed from hot path 2026-05-29)
+dev_whitelist_file      = ""                # disabled (kept on disk; see dev_resolver.rs comment)
+
+# === Wallet ===
+[wallet]
+keyfile               = "/data/bsc-meme-mev/.trader_wallet"
+# Address is derived from the keyfile at startup; printed on boot for verification.
+
+# === Submission ===
+[submission]
+primary_url           = "https://bsc.blockrazor.xyz"
+primary_auth_env      = "BLOCKRAZOR_AUTH_KEY"   # read from .env
+fallback_url          = "http://127.0.0.1:8545"  # local geth — only if BR errors
+timeout_ms            = 5000
+
+# === Token policy ===
+[tokens]
+min_age_seconds       = 60      # skip tokens younger than 1 min (rug risk)
+max_sell_tax_bps      = 500     # skip if sampled sell-tax > 5%
+blacklist_file        = "/data/bsc-meme-mev/config/token_blacklist.toml"
+
+# === Audit ===
+[audit]
+log_dir               = "/data/bsc-meme-mev/trader_live"
+telegram_alerts       = true

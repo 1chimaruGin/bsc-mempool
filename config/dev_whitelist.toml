@@ -1,0 +1,30 @@
+# Trusted token deployers (Four.Meme createToken callers) on BSC.
+# Any token created by one of these devs → trade size doubled from the
+# default ($10) to the bonus ($20). Source: user's 2026-05-28 curated
+# table of D+I's frequent winning devs.
+#
+# Editing this file does NOT auto-reload — restart bsc-runner to apply.
+# Addresses are case-insensitive (compared lowercase).
+
+devs = [
+    # rank 1 — 7 tokens, $3927 spent (user's table)
+    "0x1f4788f67b734a693c474b6156d6729a61d4c46e",
+    # rank 2 — 5 tokens, $2597 (= user's "Best" dev #17)
+    "0xe881f671b1ede86d4a8e3315ce13b77257ec7525",
+    # rank 3 — 4 tokens, $2265
+    "0x57a01234c07902722dca5c7363c4cdde6b059f9d",
+    # rank 4 — 4 tokens, $1612 (CONFIRMED by our paper-trader: D AND I both won here)
+    "0x32b68553255e3525519cc6bf21d4821e4e62d9bd",
+    # rank 5 — 3 tokens, $2120
+    "0x0f93496909e0f93424a9db8cfa141b1094c9abb3",
+    # rank 6 — 3 tokens, $1493
+    "0xca897a53b7e603d0248adba31fd187525773cf21",
+    # rank 7 — 3 tokens, $1179
+    "0xaf504749bcdcdcf5adeb6bdb734a9366a8f6d561",
+    # rank 8 — 2 tokens, $866 (= user's "Good" dev)
+    "0x47ae16b879bafb7dd0b91f29e4e8c337fc5d2678",
+    # rank 9 — 2 tokens, $866
+    "0x78667855f74bbe1e64718a97f33a824fab79ff09",
+    # rank 10 — 2 tokens, $747 (CONFIRMED by our paper-trader on builder token, I won)
+    "0xaf02ed92699c10b0d70da0d75474dd4b34655689",
+]

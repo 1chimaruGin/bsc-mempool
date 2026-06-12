@@ -1,0 +1,8 @@
+# Dev-sniper whitelist — 2 devs only, paper-mode test 2026-06-01.
+# Separate file from the trader's `dev_whitelist.toml` so we can iterate
+# the sniper list without disturbing the (now-paused) KOL copy-trader.
+
+devs = [
+    "0xe881f671b1ede86d4a8e3315ce13b77257ec7525",  # rank #2 in user's table (5 tokens, $2597 — "Best dev #17")
+    "0x2812fcab8046acf310bf5349e0f1d0ac79ac9dbf",  # NEW — added 2026-06-01 for paper-mode test
+]

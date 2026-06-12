@@ -11,12 +11,19 @@ WorkingDirectory=/data/bsc-meme-mev
 # Telegram bot token + chat id come from .env (root-only, gitignored).
 EnvironmentFile=-/data/bsc-meme-mev/.env
 # Map the friendly env names .env exports into the figment-prefixed names
-# the runner config layer reads. Empty defaults so we don't blow up if .env
-# is missing.
+# the runner config layer reads. Only export when the source var is NON-EMPTY:
+# figment coerces an empty string to the target type and an empty CHAT_ID
+# ("" → i64) is a hard parse error → crash loop. Unset = figment falls back
+# to the toml/struct default and the runner logs "alerts off" and continues.
 ExecStart=/bin/bash -c '\
-    export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}" ; \
-    export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__CHAT_ID="${TELEGRAM_CHAT_ID:-}" ; \
-    export BSC_MEME_MEV_TRADER__TELEGRAM__BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}" ; \
+    [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__BOT_TOKEN="$TELEGRAM_BOT_TOKEN" ; \
+    [ -n "${TELEGRAM_CHAT_ID:-}" ]  && export BSC_MEME_MEV_KOL_WATCH__TELEGRAM__CHAT_ID="$TELEGRAM_CHAT_ID" ; \
+    [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && export BSC_MEME_MEV_TRADER__TELEGRAM__BOT_TOKEN="$TELEGRAM_BOT_TOKEN" ; \
+    [ -n "${TELEGRAM_CHAT_ID:-}" ]  && export BSC_MEME_MEV_TRADER__TELEGRAM__CHAT_ID="$TELEGRAM_CHAT_ID" ; \
+    [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && export BSC_MEME_MEV_TRADER_PRIVATE__TELEGRAM__BOT_TOKEN="$TELEGRAM_BOT_TOKEN" ; \
+    [ -n "${TELEGRAM_CHAT_ID:-}" ]  && export BSC_MEME_MEV_TRADER_PRIVATE__TELEGRAM__CHAT_ID="$TELEGRAM_CHAT_ID" ; \
+    [ -n "${NODEREAL_RPC_URL:-}" ]  && export BSC_MEME_MEV_TRADER__ARCHIVE_RPC_URL="$NODEREAL_RPC_URL" ; \
+    [ -n "${NODEREAL_RPC_URL:-}" ]  && export BSC_MEME_MEV_TRADER_PRIVATE__ARCHIVE_RPC_URL="$NODEREAL_RPC_URL" ; \
     exec /data/bsc-meme-mev/target/release/bsc-runner run \
         --config /data/bsc-meme-mev/config/default.toml'
 Restart=on-failure
